@@ -18,22 +18,24 @@ var router = Backbone.Router.extend({
         'create': 'newCadaver',
         'continue': 'continueCadaver',
         'seeall': 'readCadavers',
-        'see': 'readCadaver'
+        'random': 'readCadaver',
+        'thanks': 'nextSteps'
         // 'ab/addressbooks/:id1(/:pageNum)/entry/:id2': 'showEntry'
     },
     // homePage: function() {
     //     this.navigate('ab', {trigger: true});
     // },
-    newCadaver: functions.createStory,
-    continueCadaver: functions.getStoryToContinue,
-    readCadavers: functions.seeCompletedStories,
-    readCadaver: functions.seeCompletedStory
+    newCadaver: functions.createStory(),
+    continueCadaver: functions.getStoryToContinue(),
+    readCadavers: functions.seeCompletedStories(),
+    readCadaver: functions.seeCompletedStory(),
+    nextSteps: functions.nextSteps()
 });
 
-functions.getStoryToContinue;
+// functions.getStoryToContinue;
 
 var thisRouter = new router;
 
-thisRouter.on();
+// thisRouter.on();
 
 Backbone.history.start();

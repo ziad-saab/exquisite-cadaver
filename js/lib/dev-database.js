@@ -6,13 +6,15 @@ var $app = $('#app');
 //Modify this variable after migrating the api to heroku
 var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
-
-
 //This function initiates the process of creating a new story:
+
 function createStory() {
     return $.getJSON(API_URL + 'Stories').then(
         function(result) {
-            var lastId = result.length;
+            var newStoryId = result.length + 1;
+            //input form
+            $app.append("<a href='#thanks'><button >Submit line</button>");
+            //ajax function here
         }
     );
 }
@@ -125,6 +127,8 @@ function getStoryToContinue() {
                                 $app.append("<p>" + line.lineText + "</p>");
                             })
                             //append a form line here
+                            $app.append("<a href='#thanks'><button >Submit line</button>");
+                            //ajax function here
                         }    
                     );
                 }
@@ -133,13 +137,19 @@ function getStoryToContinue() {
     );
 }
 
+function nextSteps() {
+    $app.append('<h3>Thanks for your contribution!</h3>');
+    $app.append('<h4>What would you like to do now?</h4>');
+    $app.append('<a href="#continue"><button>Continue another story</button></a>');
+    $app.append('<a href="#create"><button>Create a new story</button></a>');
+}
 
 //This function will add the user's new line to the story to be continued:
 // function addNewLine(){
 //   $.ajax({ method: 'POST', url: API_URL + "Lines", 
 //     data: {
 //         lineNumber: previousLine.lineNumber + 1, //how do we get the previous line's line number?
-//         date: "CURDATE", // how do we get the current date??
+//         date: "CURDATE", 
 //         lineText: userInput, //have to define variable
 //         storiesId: storiesId //how do we get the story id?
 //     } 
@@ -150,5 +160,6 @@ module.exports = {
     createStory: createStory(),
     seeCompletedStories: seeCompletedStories(),
     seeCompletedStory: seeCompletedStory(),
-    getStoryToContinue: getStoryToContinue()
+    getStoryToContinue: getStoryToContinue(),
+    nextSteps: nextSteps()
 };
