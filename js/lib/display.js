@@ -1,36 +1,44 @@
-// var Backbone = require('backbone');
+var retrieval = require('./retrieval.js')
 // var _ = require('underscore');
-$(document).foundation();
 var $app = $('#app');
-
-//Modify this variable after migrating the api to heroku
-var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
 //This function initiates the process of creating a new story:
 
 function createStory() {
-    return $.getJSON(API_URL + 'Stories').then(
+    console.log("hello from createStory()");
+    return $.getJSON(retrieval.API_URL + 'Stories').then(
         function(result) {
             var newStoryId = result.length + 1;
+            
+            $app.html('');
+            $app.append('<a href="#"><button> <<< </button></a>');
+            $app.append("<h3>Write the story's first line below:</h3>");
             //input form
-            $app.append("<a href='#thanks'><button >Submit line</button>");
+            $app.append('<a href="#choice"><button >Submit line</button>');
             //ajax function here
         }
     );
 }
 
+function submitLineNewStory() {
+    console.log('Hello from submitLineNewStory()?');
+}
+
 
 //This function returns the completed stories in desc order of rating
 
-function seeCompletedStories() {
-    console.log("hello from seeCompletedStories()");
-    //$app.html(''); // Clear the #app div
-    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC"}').then(
-        function(result) {
-            $app.append("<h3>All stories, descending order of rating:</h3>");
-            result.forEach(function(story){
+function seeCompletedStories(pageNum) {
+    $app.html(''); 
+    $app.append('<a href="#"><button> <<< </button></a>');
+    $app.append("<h3>All stories, descending order of rating:</h3>");
+    retrieval.getStories(pageNum).then(
+       function(object) {
+           var result = object.stories;
+           var hasNextPage = object.hasNextPage;
+           
+           result.forEach(function(story){
                 var id = story.id;
-                $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":"lineText"}').then(
+                $.getJSON(retrieval.API_URL + 'Stories/' + id + '/Lines?filter={"fields":"lineText"}').then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
                     $app.append('<ul class="no-bullet">');
@@ -40,8 +48,23 @@ function seeCompletedStories() {
                     $app.append("</ul>");
                 });
             });
+       } 
+    ).then(
+        function(hasNextPage) {
+            //Previous page/next page buttons
+            var previousPage = $('<a href="#seeall/p' + (pageNum - 1) + '"><button class="button round">previous page</button></a>');
+            var nextPage = $('<a href="#seeall/p' + (pageNum + 1) + '"><button class="button round">next page</button></a>');
+    
+            //disable first previous page button
+            if (pageNum !== 0) {
+                $app.append(previousPage);
+            }
+            //disable last next button
+            if (hasNextPage === true) {
+                $app.append(nextPage);
+            }    
         }
-    );
+    )
 }
 
 
@@ -50,7 +73,7 @@ function seeCompletedStories() {
 function seeCompletedStory(){
     var arrayOfStories = [];
     console.log('hello from seeCompletedStory()!');
-    return $.getJSON(API_URL + 'Stories').then(
+    return $.getJSON(retrieval.API_URL + 'Stories').then(
         function(result) {
             //collects in an array the ids of the stories that have been completed
             result.forEach(function(story) {
@@ -68,9 +91,10 @@ function seeCompletedStory(){
     ).then(
         function(storyId) {
             //gets all the lines from the story randomly chosen above
-            $.getJSON(API_URL + 'Stories/' + storyId + '/Lines?filter={"fields":"lineText"}').then(
+            $.getJSON(retrieval.API_URL + 'Stories/' + storyId + '/Lines?filter={"fields":"lineText"}').then(
                 function(lines){
-                    //$app.html(''); // Clear the #app div
+                    $app.html('');
+                    $app.append('<a href="#"><button> <<< </button></a>');
                     $app.append("<h2>Story #" + storyId + "</h2>");
                     $app.append("<h3>One story, at random:</h3>");
                     $app.append('<ul class="no-bullet">');
@@ -78,6 +102,8 @@ function seeCompletedStory(){
                         $app.append("<li>" + line.lineText + "</li>");
                     });
                     $app.append("</ul>");
+                    $app.append('<a href="#random"><button>Gimme another!</button></a>');
+                    //will have to make the above a clickon event
                 });
         }    
     );
@@ -88,7 +114,7 @@ function seeCompletedStory(){
 function getStoryToContinue() {
     var arrayOfStories = [];
     console.log('Hello from getStoryToContinue()!!');
-    return $.getJSON(API_URL + 'Stories').then(
+    return $.getJSON(retrieval.API_URL + 'Stories').then(
         function(result) {
             //collects in an array the ids of the stories that are not complete yet
             result.forEach(function(story){
@@ -100,9 +126,9 @@ function getStoryToContinue() {
     ).then(
         function(){
             if (arrayOfStories.length === 0) {
-                $app.html(''); // Clear the #app div
-                $app.append("<h3>There are no stories to continue. Why not start one!</h3>");
-                $app.append("<button><a href='#create'>Start a new story</a></button>");
+                $app.html('');
+                $app.append('<a href="#"><button> <<< </button></a>');
+                $app.append("<h3>There are no stories to continue.</h3>");
                 return;
             }
             else {
@@ -114,20 +140,21 @@ function getStoryToContinue() {
     ).then(
         function(storyId) {
             //gets all the lines from the story randomly chosen above
-            $.getJSON(API_URL + 'Stories/' + storyId + '/Lines').then(
+            $.getJSON(retrieval.API_URL + 'Stories/' + storyId + '/Lines').then(
                 function(result) {
                     //gets the last written line of the story to continue
                     var lastLine = result.length;
-                    $.getJSON(API_URL + 'Stories/' + storyId + '/Lines?filter={"where":{"lineNumber":' + lastLine + '},"fields":"lineText"}').then(
+                    $.getJSON(retrieval.API_URL + 'Stories/' + storyId + '/Lines?filter={"where":{"lineNumber":' + lastLine + '},"fields":"lineText"}').then(
                         function(previousLine) {
-                            //$app.html(''); // Clear the #app div
+                            $app.html('');
+                            $app.append('<a href="#"><button> <<< </button></a>');
                             $app.append("<h2>Story #" + storyId + "</h2>");
                             $app.append("<h3>Previous Line:</h3>");
                             previousLine.forEach(function(line) {
                                 $app.append("<p>" + line.lineText + "</p>");
                             })
                             //append a form line here
-                            $app.append("<a href='#thanks'><button >Submit line</button>");
+                            $app.append("<a href='#choice'><button >Submit line</button>");
                             //ajax function here
                         }    
                     );
@@ -137,11 +164,16 @@ function getStoryToContinue() {
     );
 }
 
+//This function gives users some options after completing their line (also the app landing page during dev)
+
 function nextSteps() {
-    $app.append('<h3>Thanks for your contribution!</h3>');
+    $app.html('');
+    // $app.append('<h3>Thanks for your contribution!</h3>');
     $app.append('<h4>What would you like to do now?</h4>');
     $app.append('<a href="#continue"><button>Continue another story</button></a>');
     $app.append('<a href="#create"><button>Create a new story</button></a>');
+    $app.append('<a href="#seeall"><button>Rate the other stories</button></a>');
+    $app.append('<a href="#random"><button>Read a story at random</button></a>');
 }
 
 //This function will add the user's new line to the story to be continued:
@@ -157,9 +189,9 @@ function nextSteps() {
 // }
 
 module.exports = {
-    createStory: createStory(),
-    seeCompletedStories: seeCompletedStories(),
-    seeCompletedStory: seeCompletedStory(),
-    getStoryToContinue: getStoryToContinue(),
-    nextSteps: nextSteps()
+    'createStory': createStory,
+    'seeCompletedStories': seeCompletedStories,
+    'seeCompletedStory': seeCompletedStory,
+    'getStoryToContinue': getStoryToContinue,
+    'nextSteps': nextSteps
 };
