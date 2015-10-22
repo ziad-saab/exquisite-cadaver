@@ -207,8 +207,11 @@
 	                $app.append("<li>" + line.lineText + "</li>");
 	            });
 	            $app.append("</ul>");
-	            $app.append('<a href="#random"><button>Gimme another!</button></a>');
-	            //will have to make the above a clickon event
+	            $app.append('<button id="randomize">Gimme another!</button>');
+	            
+	            $('#randomize').on("click", function(){
+	                window.location.reload();
+	            });
 	        }
 	    );    
 	}
@@ -223,6 +226,8 @@
 	        function(object) {
 	            var exist = object.exist;
 	            var storyId = object.storyId;
+	            var storyLength = object.storyLength;
+	            console.log(storyLength);
 	            
 	            if (exist === false) {
 	                $app.append('There are no more stories to continue. Why not start a new one?');
@@ -250,6 +255,11 @@
 	                            }
 	                            else {
 	                                $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine}});
+	                                
+	                                if (storyLength === (lastLine + 1)) {
+	                                    $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
+	                                }
+	                                
 	                                alert("Thanks! Your new line was submitted.");
 	                                window.location.href = "#choice";
 	                            }
@@ -379,10 +389,19 @@
 	                exist = true;
 	                //this will return one of the array's id at random
 	                var poz = Math.floor( Math.random() * arrayOfStories.length );
-	                return {
-	                    'storyId': arrayOfStories[poz],
-	                    'exist': exist
-	                };
+	                var storyId = arrayOfStories[poz];
+	                
+	                return $.getJSON(API_URL + 'Stories/' + storyId).then(
+	                    function(storyInfo) {
+	                        var storyLength = storyInfo.length;
+	                        return {
+	                            'storyId': storyId,
+	                            'exist': exist,
+	                            'storyLength': storyLength
+	                        };
+	                    }    
+	                );
+
 	            }    
 	        }
 	    );       

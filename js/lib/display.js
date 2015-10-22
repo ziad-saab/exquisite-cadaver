@@ -95,8 +95,11 @@ function seeCompletedStory(){
                 $app.append("<li>" + line.lineText + "</li>");
             });
             $app.append("</ul>");
-            $app.append('<a href="#random"><button>Gimme another!</button></a>');
-            //will have to make the above a clickon event
+            $app.append('<button id="randomize">Gimme another!</button>');
+            
+            $('#randomize').on("click", function(){
+                window.location.reload();
+            });
         }
     );    
 }
@@ -111,6 +114,8 @@ function getStoryToContinue() {
         function(object) {
             var exist = object.exist;
             var storyId = object.storyId;
+            var storyLength = object.storyLength;
+            console.log(storyLength);
             
             if (exist === false) {
                 $app.append('There are no more stories to continue. Why not start a new one?');
@@ -138,6 +143,11 @@ function getStoryToContinue() {
                             }
                             else {
                                 $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine}});
+                                
+                                if (storyLength === (lastLine + 1)) {
+                                    $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
+                                }
+                                
                                 alert("Thanks! Your new line was submitted.");
                                 window.location.href = "#choice";
                             }

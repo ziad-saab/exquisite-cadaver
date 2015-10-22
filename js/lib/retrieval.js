@@ -90,10 +90,19 @@ function getIncompleteStory(){
                 exist = true;
                 //this will return one of the array's id at random
                 var poz = Math.floor( Math.random() * arrayOfStories.length );
-                return {
-                    'storyId': arrayOfStories[poz],
-                    'exist': exist
-                };
+                var storyId = arrayOfStories[poz];
+                
+                return $.getJSON(API_URL + 'Stories/' + storyId).then(
+                    function(storyInfo) {
+                        var storyLength = storyInfo.length;
+                        return {
+                            'storyId': storyId,
+                            'exist': exist,
+                            'storyLength': storyLength
+                        };
+                    }    
+                );
+
             }    
         }
     );       
