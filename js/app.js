@@ -12,7 +12,7 @@ $('.buttonAbout').click(function(e){
 $('.buttonAboutClose').click(function(e){
     $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');
     setTimeout(function() {
-        $layout.addClass('hide');
+        $layout.removeClass('animated slideOutDown').addClass('hide');
     }, 1000)
     e.preventDefault();
 });

@@ -1,6 +1,33 @@
 var retrieval = require('./retrieval.js')
+var _ = require("underscore")
 var $app = $('#app');
 var $buttons = $('#buttons');
+
+var $header = $('#header');
+function createHeader(options) {
+    $header.html('');
+    var entryTemplateText = require('raw!../views/header.ejs');
+    console.log(entryTemplateText);
+    
+    
+    var template = _.template( entryTemplateText );
+    
+    console.log(template);
+    
+    var compiledTemplate = template();
+    
+    console.log(compiledTemplate);
+    
+    $header.append(compiledTemplate);
+    // add rest
+}
+
+var $footer = $('#footer');
+function createFooter(options) {
+    $footer.html('');
+    $footer.append('<h1>FOOTER</h1>');
+    // add rest
+}
 
 //This function permits users to write the first line of a new story:
 function createStory() {
@@ -10,12 +37,18 @@ function createStory() {
             
             $buttons.html('');
             $app.html('');
+            
+            createHeader();
+            
             $app.append('<a href="#"><button> Back to Main Menu </button></a>');
             $app.append("<h3>How long will this story be?</h3>");
             $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="lines" value="10" id="ten"><label for="ten">10 Lines</label><input type="radio" name="lines" value="15" id="fifteen"><label for="fifteen">15 Lines</label><input type="radio" name="lines" value="20" id="twenty"><label for="twenty">20 Lines</label></div></div></form>');
             $app.append("<h3>Write the story's first line below:</h3>");
             $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input type="text" placeholder="Go crazy!" /></div></div></form>');
             $app.append('<a href="#choice"><button >Submit line</button>');
+            
+            createFooter();
+            
             //ajax function here
         }
     );
@@ -31,6 +64,8 @@ function submitLineNewStory() {
 function seeCompletedStories(pageNum) {
     $buttons.html('');
     $app.html(''); 
+    
+    createHeader();
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
@@ -69,6 +104,7 @@ function seeCompletedStories(pageNum) {
             }    
         }
     );
+    createFooter();
 }
 
 //This function displays one completed story at random:
@@ -79,6 +115,7 @@ function seeCompletedStory(){
             
             $app.html('');
             $buttons.html('');
+            createHeader();
             $app.append('<a href="#"><button> Back to Main Menu </button></a>');
             $app.append("<h2>Story #" + storyId + "</h2>");
             $app.append("<h3>One story, at random:</h3>");
@@ -90,7 +127,8 @@ function seeCompletedStory(){
             $app.append('<a href="#random"><button>Gimme another!</button></a>');
             //will have to make the above a clickon event
         }
-    );    
+    ); 
+    createFooter();
 }
 
 
@@ -98,6 +136,7 @@ function seeCompletedStory(){
 function getStoryToContinue() {
     $app.html('');
     $buttons.html('');
+    createHeader();
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(object) {
@@ -113,7 +152,9 @@ function getStoryToContinue() {
                     function(result) {
                         //gets the last written line of the story to continue
                         var lastLine = result.length;
+                        console.log(result[lastLine - 1]);
                         var previousLine = result[lastLine - 1].lineText;
+                        
                         $app.append("<h2>Story #" + storyId + "</h2>");
                         $app.append("<h3>Previous Line:</h3>");
                         $app.append("<p>" + previousLine + "</p>");
@@ -125,6 +166,7 @@ function getStoryToContinue() {
             }
         }
     );
+    createFooter();
 }
 
 //This function gives users some options after completing their line (also the app landing page during dev)
