@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       //Since the task outputs app-bundle.js in the js directory,
       // we have to exclude this file from our watch list
       webpack: {
-        files: ['js/**/*.js', 'js/*.js', '!js/app-bundle.js'],
+        files: ['js/**/*.js', '!js/app-bundle.js'],
         tasks: ['webpack']
       }
 
