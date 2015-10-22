@@ -110,33 +110,41 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var retrieval = __webpack_require__(2)
+	var retrieval = __webpack_require__(2);
 	var $app = $('#app');
 	var $buttons = $('#buttons');
 
 	//This function permits users to write the first line of a new story:
 	function createStory() {
-	    return $.getJSON(retrieval.API_URL + 'Stories').then(
-	        function(result) {
-	            var newStoryId = (result.length + 1);
+	    $buttons.html('');
+	    $app.html('');
+	    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+	    $app.append("<h3>How long will this story be?</h3>");
+	    $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="nbOfLines" value="10" id="ten"><label for="ten">10 lines</label><input type="radio" name="nbOfLines" value="15" id="fifteen"><label for="fifteen">15 lines</label><input type="radio" name="nbOfLines" value="20" id="twenty"><label for="twenty">20 lines</label></div></div></form>');
+	    $app.append("<h3>Write the story's first line below:</h3>");
+	    $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
+	    $app.append('<button id="newStory">Submit line</button>');
 	            
-	            $buttons.html('');
-	            $app.html('');
-	            $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-	            $app.append("<h3>How long will this story be?</h3>");
-	            $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="lines" value="10" id="ten"><label for="ten">10 Lines</label><input type="radio" name="lines" value="15" id="fifteen"><label for="fifteen">15 Lines</label><input type="radio" name="lines" value="20" id="twenty"><label for="twenty">20 Lines</label></div></div></form>');
-	            $app.append("<h3>Write the story's first line below:</h3>");
-	            $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input type="text" placeholder="Go crazy!" /></div></div></form>');
-	            $app.append('<a href="#choice"><button >Submit line</button>');
-	            //ajax function here
+	    //The ajax function that's triggered when the button in createStory is clicked
+	    $('#newStory').on("click", function(){
+	        var newLine = $('.newLine').val();
+	        var lineNb = $('*[name=nbOfLines]:checked').val();
+	        
+	        if (!newLine || newLine.length < 1) {
+	            alert("You haven't entered anything!");
+	        }
+	        else if (!lineNb || lineNb === undefined ) {
+	        }
+	        else {
+	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': lineNb, 'lineText': newLine}});
+	            alert("Thanks! Your new story was submitted.");
+	            window.location.href = "#choice";
+	        }
 	        }
 	    );
 	}
 
-	//The ajax function that's triggered when the button in createStory is clicked
-	function submitLineNewStory() {
-	    console.log('Hello from submitLineNewStory()?');
-	}
+
 
 
 	//This function returns the completed stories in desc order of rating, a certain number per page
@@ -229,9 +237,23 @@
 	                        $app.append("<h2>Story #" + storyId + "</h2>");
 	                        $app.append("<h3>Previous Line:</h3>");
 	                        $app.append("<p>" + previousLine + "</p>");
-	                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input type="text" placeholder="Go crazy!" /></div></div></form>');
-	                        $app.append("<a href='#choice'><button >Submit line</button>");
-	                        //ajax function here
+	                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
+	                        $app.append("<button id='submit'>Submit line</button>");
+	                        
+	                        //The ajax function that's triggered when the button is clicked
+	                        $('#submit').on("click", function(){
+	                            var newLine = $('.newLine').val();
+	                            console.log(newLine);
+	                            
+	                            if (newLine === undefined || newLine.length < 1) {
+	                                alert("You haven't entered anything!");
+	                            }
+	                            else {
+	                                $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine}});
+	                                alert("Thanks! Your new line was submitted.");
+	                                window.location.href = "#choice";
+	                            }
+	                        });    
 	                    }
 	                );
 	            }
@@ -252,18 +274,6 @@
 	    $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
 	}
 
-	//This function will add the user's new line to the story to be continued:
-	// function addNewLine(){
-	//   $.ajax({ method: 'POST', url: API_URL + "Lines", 
-	//     data: {
-	//         lineNumber: previousLine.lineNumber + 1, //how do we get the previous line's line number?
-	//         date: "CURDATE", 
-	//         lineText: userInput, //have to define variable
-	//         storiesId: storiesId //how do we get the story id?
-	//     } 
-	//     }); 
-	// }
-
 	module.exports = {
 	    'createStory': createStory,
 	    'seeCompletedStories': seeCompletedStories,
@@ -283,6 +293,23 @@
 
 
 	// Data retrieval functions
+	function startNewStory(){
+	    return $.getJSON(API_URL + 'Stories').then(
+	        function(result) {
+	            var newStoryId = result.length + 1;
+	            return $.getJSON(API_URL + 'Lines').then(
+	                function(linesResult){
+	                    var newLineId = linesResult.length;
+	                    return {
+	                        newLineId: newLineId,
+	                        newStoryId: newStoryId
+	                    }
+	                }
+	            )
+	        }
+	    )
+	}
+
 	function getStoriesByRating(pageNum) {
 	    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * 2 + ',"limit":' + (2 + 1) + ',"where":{"incomplete":"false"}}').then(
 	        function(result) {
@@ -373,7 +400,8 @@
 	    'getStoriesLines': getStoriesLines,
 	    'getStoriesByRating': getStoriesByRating,
 	    'getIncompleteStory': getIncompleteStory,
-	    'getLines': getLines
+	    'getLines': getLines,
+	    'startNewStory': startNewStory
 	};
 	            
 

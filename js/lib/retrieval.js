@@ -4,6 +4,23 @@ var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
 
 // Data retrieval functions
+function startNewStory(){
+    return $.getJSON(API_URL + 'Stories').then(
+        function(result) {
+            var newStoryId = result.length + 1;
+            return $.getJSON(API_URL + 'Lines').then(
+                function(linesResult){
+                    var newLineId = linesResult.length;
+                    return {
+                        newLineId: newLineId,
+                        newStoryId: newStoryId
+                    }
+                }
+            )
+        }
+    )
+}
+
 function getStoriesByRating(pageNum) {
     return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * 2 + ',"limit":' + (2 + 1) + ',"where":{"incomplete":"false"}}').then(
         function(result) {
@@ -94,6 +111,7 @@ module.exports = {
     'getStoriesLines': getStoriesLines,
     'getStoriesByRating': getStoriesByRating,
     'getIncompleteStory': getIncompleteStory,
-    'getLines': getLines
+    'getLines': getLines,
+    'startNewStory': startNewStory
 };
             
