@@ -3,31 +3,28 @@ var _ = require("underscore")
 var $app = $('#app');
 var $buttons = $('#buttons');
 
+
+//This function creates the header in each view 
 var $header = $('#header');
 function createHeader(options) {
     $header.html('');
     var entryTemplateText = require('raw!../views/header.ejs');
-    console.log(entryTemplateText);
-    
-    
     var template = _.template( entryTemplateText );
-    
-    console.log(template);
-    
     var compiledTemplate = template();
-    
-    console.log(compiledTemplate);
-    
     $header.append(compiledTemplate);
-    // add rest
 }
 
+//This function creates the footer in each view
 var $footer = $('#footer');
 function createFooter(options) {
     $footer.html('');
-    $footer.append('<h1>FOOTER</h1>');
-    // add rest
+    var entryTemplateText = require('raw!../views/footer.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $footer.append(compiledTemplate);
 }
+    
+  
 
 //This function permits users to write the first line of a new story:
 function createStory() {
@@ -37,7 +34,6 @@ function createStory() {
             
             $buttons.html('');
             $app.html('');
-            
             createHeader();
             
             $app.append('<a href="#"><button> Back to Main Menu </button></a>');
@@ -64,8 +60,8 @@ function submitLineNewStory() {
 function seeCompletedStories(pageNum) {
     $buttons.html('');
     $app.html(''); 
-    
     createHeader();
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
@@ -116,6 +112,7 @@ function seeCompletedStory(){
             $app.html('');
             $buttons.html('');
             createHeader();
+            
             $app.append('<a href="#"><button> Back to Main Menu </button></a>');
             $app.append("<h2>Story #" + storyId + "</h2>");
             $app.append("<h3>One story, at random:</h3>");
@@ -137,6 +134,7 @@ function getStoryToContinue() {
     $app.html('');
     $buttons.html('');
     createHeader();
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(object) {
@@ -174,12 +172,14 @@ function getStoryToContinue() {
 function nextSteps() {
     $buttons.html('');
     $app.html('');
+    createHeader();
     // $app.append('<h3>Thanks for your contribution!</h3>');
     $app.append('<h4>What would you like to do now?</h4>');
     $app.append('<a href="#continue"><button>Continue another story</button></a><br/>');
     $app.append('<a href="#create"><button>Create a new story</button></a><br/>');
     $app.append('<a href="#seeall"><button>Rate the other stories</button></a><br/>');
     $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
+    createFooter();
 }
 
 //This function will add the user's new line to the story to be continued:
