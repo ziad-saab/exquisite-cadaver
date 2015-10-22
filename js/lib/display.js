@@ -1,17 +1,20 @@
 var retrieval = require('./retrieval.js')
 var $app = $('#app');
+var $buttons = $('#buttons');
 
 //This function permits users to write the first line of a new story:
 function createStory() {
-    console.log("hello from createStory()");
     return $.getJSON(retrieval.API_URL + 'Stories').then(
         function(result) {
             var newStoryId = (result.length + 1);
             
+            $buttons.html('');
             $app.html('');
-            $app.append('<a href="#"><button> <<< </button></a>');
+            $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+            $app.append("<h3>How long will this story be?</h3>");
+            $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="lines" value="10" id="ten"><label for="ten">10 Lines</label><input type="radio" name="lines" value="15" id="fifteen"><label for="fifteen">15 Lines</label><input type="radio" name="lines" value="20" id="twenty"><label for="twenty">20 Lines</label></div></div></form>');
             $app.append("<h3>Write the story's first line below:</h3>");
-            //input form
+            $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input type="text" placeholder="Go crazy!" /></div></div></form>');
             $app.append('<a href="#choice"><button >Submit line</button>');
             //ajax function here
         }
@@ -26,8 +29,9 @@ function submitLineNewStory() {
 
 //This function returns the completed stories in desc order of rating, a certain number per page
 function seeCompletedStories(pageNum) {
+    $buttons.html('');
     $app.html(''); 
-    $app.append('<a href="#"><button> <<< </button></a>');
+    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
        function(object) {
@@ -57,11 +61,11 @@ function seeCompletedStories(pageNum) {
     
             //disable first previous page button
             if (pageNum !== 0) {
-                $app.append(previousPage);
+                $buttons.append(previousPage);
             }
             //disable last next button
             if (hasNextPage === true) {
-                $app.append(nextPage);
+                $buttons.append(nextPage);
             }    
         }
     );
@@ -74,7 +78,8 @@ function seeCompletedStory(){
             var storyId = lines[1].storiesId;
             
             $app.html('');
-            $app.append('<a href="#"><button> <<< </button></a>');
+            $buttons.html('');
+            $app.append('<a href="#"><button> Back to Main Menu </button></a>');
             $app.append("<h2>Story #" + storyId + "</h2>");
             $app.append("<h3>One story, at random:</h3>");
             $app.append('<ul class="no-bullet">');
@@ -92,7 +97,8 @@ function seeCompletedStory(){
 //This function chooses one incomplete story at random for the user to continue:
 function getStoryToContinue() {
     $app.html('');
-    $app.append('<a href="#"><button> <<< </button></a>');
+    $buttons.html('');
+    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(object) {
             var exist = object.exist;
@@ -111,7 +117,7 @@ function getStoryToContinue() {
                         $app.append("<h2>Story #" + storyId + "</h2>");
                         $app.append("<h3>Previous Line:</h3>");
                         $app.append("<p>" + previousLine + "</p>");
-                        //append a form line here
+                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input type="text" placeholder="Go crazy!" /></div></div></form>');
                         $app.append("<a href='#choice'><button >Submit line</button>");
                         //ajax function here
                     }
@@ -124,13 +130,14 @@ function getStoryToContinue() {
 //This function gives users some options after completing their line (also the app landing page during dev)
 
 function nextSteps() {
+    $buttons.html('');
     $app.html('');
     // $app.append('<h3>Thanks for your contribution!</h3>');
     $app.append('<h4>What would you like to do now?</h4>');
-    $app.append('<a href="#continue"><button>Continue another story</button></a>');
-    $app.append('<a href="#create"><button>Create a new story</button></a>');
-    $app.append('<a href="#seeall"><button>Rate the other stories</button></a>');
-    $app.append('<a href="#random"><button>Read a story at random</button></a>');
+    $app.append('<a href="#continue"><button>Continue another story</button></a><br/>');
+    $app.append('<a href="#create"><button>Create a new story</button></a><br/>');
+    $app.append('<a href="#seeall"><button>Rate the other stories</button></a><br/>');
+    $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
 }
 
 //This function will add the user's new line to the story to be continued:
