@@ -115,7 +115,6 @@ function getStoryToContinue() {
             var exist = object.exist;
             var storyId = object.storyId;
             var storyLength = object.storyLength;
-            console.log(storyLength);
             
             if (exist === false) {
                 $app.append('There are no more stories to continue. Why not start a new one?');
@@ -136,7 +135,6 @@ function getStoryToContinue() {
                         //The ajax function that's triggered when the button is clicked
                         $('#submit').on("click", function(){
                             var newLine = $('.newLine').val();
-                            console.log(newLine);
                             
                             if (newLine === undefined || newLine.length < 1) {
                                 alert("You haven't entered anything!");
