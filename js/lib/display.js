@@ -28,27 +28,37 @@ function createFooter(options) {
 var $layout = $('.aboutTheProjectAndRules hide');
 function deployingLayout() {
     $layout.html('');
-    var entryTemplateText = require('raw!../views/layout.ejs')
+    var entryTemplateText = require('raw!../views/layout.ejs');
     var template = _.template( entryTemplateText );
     var compiledTemplate = template();
     $layout.append(compiledTemplate);
 }
+  
 
-//This function permits users to write the first line of a new story:
-function createStory() {
-    console.log('createStory >>>')
+//This function permits users to choose the length of a new story:
+
+var $numberOfLines = $('input .length').val();
+function createStoryLength() {
     $buttons.html('');
     $app.html('');
     createHeader();
-    
-    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-    $app.append("<h3>How long will this story be?</h3>");
-    $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="nbOfLines" value="10" id="ten"><label for="ten">10 lines</label><input type="radio" name="nbOfLines" value="15" id="fifteen"><label for="fifteen">15 lines</label><input type="radio" name="nbOfLines" value="20" id="twenty"><label for="twenty">20 lines</label></div></div></form>');
-    $app.append("<h3>Write the story's first line below:</h3>");
-    $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-    $app.append('<button id="newStory">Submit line</button>');
+    var entryTemplateText = require('raw!../views/createStoryLength.ejs');
+    var template = _.template(entryTemplateText);
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
     
     createFooter();
+    
+// The function that's triggered when the length button is clicked
+//This function makes appear the form (with the length choosen) where users write the first line of a new story
+    var $length = $('input .length');
+    console.log($numberOfLines);
+    $length.onclick = function createStoryText() {
+    var entryTemplateText = require('raw!../views/createStoryText.ejs');
+    var template = _.template(entryTemplateText);
+    var compiledTemplate = template({numberOfLines: $numberOfLines});
+    $app.append(compiledTemplate);
+    };
             
     //The ajax function that's triggered when the button in createStory is clicked
     $('#newStory').on("click", function(){
@@ -59,6 +69,7 @@ function createStory() {
             alert("You haven't entered anything!");
         }
         else if (!lineNb || lineNb === undefined ) {
+            alert("You must choose a length");
         }
         else {
             $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': lineNb, 'lineText': newLine}});
@@ -78,21 +89,27 @@ function seeCompletedStories(pageNum) {
     $app.html(''); 
     createHeader();
     
+    //This is the basic if we want to implemant a template 
+    // var entryTemplateText = require('raw!../views/seeCompletedStories.ejs');
+    // var template = _.template(entryTemplateText);
+    // var compiledTemplate = template();
+    // $app.append(compiledTemplate);
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
-       function(object) {
-           var result = object.arrayOfStories;
-           var hasNextPage = object.hasNextPage;
+        function(apiResultObject) {
+            var stories = apiResultObject.arrayOfStories;
+            var hasNextPage = apiResultObject.hasNextPage;
            
-           result.forEach(function(story){
+            stories.forEach(function(story){
                 var id = story.id;
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
-                        $app.append("<li>" + line.lineText + "</li>");
+                    $app.append("<li>" + line.lineText + "</li>");
                     });
                 });
             });
@@ -128,16 +145,10 @@ function seeCompletedStory(){
             $app.html('');
             $buttons.html('');
             createHeader();
-            
-            $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-            $app.append("<h2>Story #" + storyId + "</h2>");
-            $app.append("<h3>One story, at random:</h3>");
-            $app.append('<ul class="no-bullet">');
-            lines.forEach( function(line) {
-                $app.append("<li>" + line.lineText + "</li>");
-            });
-            $app.append("</ul>");
-            $app.append('<button id="randomize">Gimme another!</button>');
+            var entryTemplateText = require('raw!../views/seeCompletedStory.ejs');
+            var template = _.template(entryTemplateText);
+            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+            $app.append(compiledTemplate);
             
             $('#randomize').on("click", function(){
                 window.location.reload();
@@ -154,12 +165,18 @@ function getStoryToContinue() {
     $buttons.html('');
     createHeader();
     
-    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+//This is the basic if we want to implemant a template    
+/*    var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
+    var template = _.template(entryTemplateText);
+//verify what we have to define    var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+    $app.append(compiledTemplate);
+    
+*/    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
-        function(object) {
-            var exist = object.exist;
-            var storyId = object.storyId;
-            var storyLength = object.storyLength;
+        function(story) {
+            var exist = story.exist;
+            var storyId = story.storyId;
+            var storyLength = story.storyLength;
             
             if (exist === false) {
                 $app.append('There are no more stories to continue. Why not start a new one?');
@@ -167,11 +184,12 @@ function getStoryToContinue() {
             else {
                 //gets all the lines from the story randomly chosen above
                 retrieval.getLines(storyId).then(
-                    function(result) {
+                    function(linesOfSelectedStory) {
+                        console.log(linesOfSelectedStory);
                         //gets the last written line of the story to continue
-                        var lastLine = result.length;
-                        console.log(result[lastLine - 1]);
-                        var previousLine = result[lastLine - 1].lineText;
+                        var lastLine = linesOfSelectedStory.length;
+                        console.log(linesOfSelectedStory[lastLine - 1]);
+                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
                         
                         $app.append("<h2>Story #" + storyId + "</h2>");
                         $app.append("<h3>Previous Line:</h3>");
@@ -211,12 +229,13 @@ function nextSteps() {
     $buttons.html('');
     $app.html('');
     createHeader();
+    
+    var entryTemplateText = require('raw!../views/nextSteps.ejs');
+    var template = _.template(entryTemplateText);
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
     // $app.append('<h3>Thanks for your contribution!</h3>');
-    $app.append('<h4>What would you like to do now?</h4>');
-    $app.append('<a href="#continue"><button>Continue another story</button></a><br/>');
-    $app.append('<a href="#create"><button>Create a new story</button></a><br/>');
-    $app.append('<a href="#seeall"><button>Rate the other stories</button></a><br/>');
-    $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
+    
     createFooter();
 }
 
