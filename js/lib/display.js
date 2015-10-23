@@ -23,7 +23,16 @@ function createFooter(options) {
     var compiledTemplate = template();
     $footer.append(compiledTemplate);
 }
-    
+
+//This function deploys the layout
+var $layout = $('.aboutTheProjectAndRules hide');
+function deployingLayout() {
+    $layout.html('');
+    var entryTemplateText = require('raw!../views/layout.ejs')
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $layout.append(compiledTemplate);
+}
   
 
 //This function permits users to write the first line of a new story:
