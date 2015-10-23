@@ -33,10 +33,10 @@ function deployingLayout() {
     var compiledTemplate = template();
     $layout.append(compiledTemplate);
 }
-  
 
 //This function permits users to write the first line of a new story:
 function createStory() {
+    console.log('createStory >>>')
     $buttons.html('');
     $app.html('');
     createHeader();

@@ -1,0 +1,28 @@
+<!--<h3>Write the story's first line below:</h3>-->
+
+<form>
+    <fieldset>
+        <legend>Write the story's first line below:</legend>
+            <div class="row">
+                <div class="small-1 columns">
+                    <label class="inline">1.</label>
+                </div>
+                <div class="small-11 columns">
+                    <input class="newLine" type="text" placeholder="Go crazy!" />
+                </div>
+            </div>
+            <% for(var i = 0; i < numberOfLines - 1; i++) { %>
+                <div class="row">
+                    <div class="small-1 columns">
+                        <label class="inline"><%= i+2 %>.</label>
+                    </div>
+                    <div class="small-11 columns">
+                        <input type="text" disabled/>
+                    </div>
+                </div>
+            <% } %>
+    </fieldset>
+</form>
+
+<button id="newStory">Submit line</button>
+
