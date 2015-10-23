@@ -1,17 +1,54 @@
-var retrieval = require('./retrieval.js');
+var retrieval = require('./retrieval.js')
+var _ = require("underscore")
 var $app = $('#app');
 var $buttons = $('#buttons');
+
+
+//This function creates the header in each view 
+var $header = $('#header');
+function createHeader(options) {
+    $header.html('');
+    var entryTemplateText = require('raw!../views/header.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $header.append(compiledTemplate);
+}
+
+//This function creates the footer in each view
+var $footer = $('#footer');
+function createFooter(options) {
+    $footer.html('');
+    var entryTemplateText = require('raw!../views/footer.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $footer.append(compiledTemplate);
+}
+
+//This function deploys the layout
+var $layout = $('.aboutTheProjectAndRules hide');
+function deployingLayout() {
+    $layout.html('');
+    var entryTemplateText = require('raw!../views/layout.ejs')
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $layout.append(compiledTemplate);
+}
+  
 
 //This function permits users to write the first line of a new story:
 function createStory() {
     $buttons.html('');
     $app.html('');
+    createHeader();
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>How long will this story be?</h3>");
     $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="nbOfLines" value="10" id="ten"><label for="ten">10 lines</label><input type="radio" name="nbOfLines" value="15" id="fifteen"><label for="fifteen">15 lines</label><input type="radio" name="nbOfLines" value="20" id="twenty"><label for="twenty">20 lines</label></div></div></form>');
     $app.append("<h3>Write the story's first line below:</h3>");
     $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
     $app.append('<button id="newStory">Submit line</button>');
+    
+    createFooter();
             
     //The ajax function that's triggered when the button in createStory is clicked
     $('#newStory').on("click", function(){
@@ -39,6 +76,8 @@ function createStory() {
 function seeCompletedStories(pageNum) {
     $buttons.html('');
     $app.html(''); 
+    createHeader();
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
@@ -77,6 +116,7 @@ function seeCompletedStories(pageNum) {
             }    
         }
     );
+    createFooter();
 }
 
 //This function displays one completed story at random:
@@ -87,6 +127,8 @@ function seeCompletedStory(){
             
             $app.html('');
             $buttons.html('');
+            createHeader();
+            
             $app.append('<a href="#"><button> Back to Main Menu </button></a>');
             $app.append("<h2>Story #" + storyId + "</h2>");
             $app.append("<h3>One story, at random:</h3>");
@@ -101,7 +143,8 @@ function seeCompletedStory(){
                 window.location.reload();
             });
         }
-    );    
+    ); 
+    createFooter();
 }
 
 
@@ -109,6 +152,8 @@ function seeCompletedStory(){
 function getStoryToContinue() {
     $app.html('');
     $buttons.html('');
+    createHeader();
+    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(object) {
@@ -125,7 +170,9 @@ function getStoryToContinue() {
                     function(result) {
                         //gets the last written line of the story to continue
                         var lastLine = result.length;
+                        console.log(result[lastLine - 1]);
                         var previousLine = result[lastLine - 1].lineText;
+                        
                         $app.append("<h2>Story #" + storyId + "</h2>");
                         $app.append("<h3>Previous Line:</h3>");
                         $app.append("<p>" + previousLine + "</p>");
@@ -155,6 +202,7 @@ function getStoryToContinue() {
             }
         }
     );
+    createFooter();
 }
 
 //This function gives users some options after completing their line (also the app landing page during dev)
@@ -162,12 +210,14 @@ function getStoryToContinue() {
 function nextSteps() {
     $buttons.html('');
     $app.html('');
+    createHeader();
     // $app.append('<h3>Thanks for your contribution!</h3>');
     $app.append('<h4>What would you like to do now?</h4>');
     $app.append('<a href="#continue"><button>Continue another story</button></a><br/>');
     $app.append('<a href="#create"><button>Create a new story</button></a><br/>');
     $app.append('<a href="#seeall"><button>Rate the other stories</button></a><br/>');
     $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
+    createFooter();
 }
 
 module.exports = {
