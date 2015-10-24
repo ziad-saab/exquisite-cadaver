@@ -64,7 +64,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(7);
+	var Backbone = __webpack_require__(11);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -147,27 +147,39 @@
 	var $layout = $('.aboutTheProjectAndRules hide');
 	function deployingLayout() {
 	    $layout.html('');
-	    var entryTemplateText = __webpack_require__(6)
+	    var entryTemplateText = __webpack_require__(6);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $layout.append(compiledTemplate);
 	}
+	  
 
-	//This function permits users to write the first line of a new story:
-	function createStory() {
-	    console.log('createStory >>>')
+	//This function permits users to choose the length of a new story:
+
+	function createStoryLength() {
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
-	    
-	    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-	    $app.append("<h3>How long will this story be?</h3>");
-	    $app.append('<form><div class="row"><div class="large-12 columns"><label>(Compulsory)</label><input type="radio" name="nbOfLines" value="10" id="ten"><label for="ten">10 lines</label><input type="radio" name="nbOfLines" value="15" id="fifteen"><label for="fifteen">15 lines</label><input type="radio" name="nbOfLines" value="20" id="twenty"><label for="twenty">20 lines</label></div></div></form>');
-	    $app.append("<h3>Write the story's first line below:</h3>");
-	    $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line 1</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-	    $app.append('<button id="newStory">Submit line</button>');
+	    var entryTemplateText = __webpack_require__(7);
+	    var template = _.template(entryTemplateText);
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
 	    
 	    createFooter();
+	    
+	    // The function that's triggered when the length button is clicked
+	    //This function makes appear the form (with the length choosen) where users write the first line of a new story
+	    var $length = $('input .length');
+	    
+	    // insert input element
+	    // read about event delegation
+	    $('delegation element goes here').on('click', 'input .length', function() {
+	        var $numberOfLines = $('input .length').val();
+	        var entryTemplateText = __webpack_require__(8);
+	        var template = _.template(entryTemplateText);
+	        var compiledTemplate = template({numberOfLines: $numberOfLines});
+	        $app.append(compiledTemplate);
+	    });
 	            
 	    //The ajax function that's triggered when the button in createStory is clicked
 	    $('#newStory').on("click", function(){
@@ -178,6 +190,7 @@
 	            alert("You haven't entered anything!");
 	        }
 	        else if (!lineNb || lineNb === undefined ) {
+	            alert("You must choose a length");
 	        }
 	        else {
 	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': lineNb, 'lineText': newLine}});
@@ -197,21 +210,27 @@
 	    $app.html(''); 
 	    createHeader();
 	    
+	    //This is the basic if we want to implemant a template 
+	    // var entryTemplateText = require('raw!../views/seeCompletedStories.ejs');
+	    // var template = _.template(entryTemplateText);
+	    // var compiledTemplate = template();
+	    // $app.append(compiledTemplate);
+	    
 	    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
 	    $app.append("<h3>All stories, descending order of rating:</h3>");
 	    retrieval.getStoriesByRating(pageNum).then(
-	       function(object) {
-	           var result = object.arrayOfStories;
-	           var hasNextPage = object.hasNextPage;
+	        function(apiResultObject) {
+	            var stories = apiResultObject.arrayOfStories;
+	            var hasNextPage = apiResultObject.hasNextPage;
 	           
-	           result.forEach(function(story){
+	            stories.forEach(function(story){
 	                var id = story.id;
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
-	                        $app.append("<li>" + line.lineText + "</li>");
+	                    $app.append("<li>" + line.lineText + "</li>");
 	                    });
 	                });
 	            });
@@ -247,16 +266,10 @@
 	            $app.html('');
 	            $buttons.html('');
 	            createHeader();
-	            
-	            $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-	            $app.append("<h2>Story #" + storyId + "</h2>");
-	            $app.append("<h3>One story, at random:</h3>");
-	            $app.append('<ul class="no-bullet">');
-	            lines.forEach( function(line) {
-	                $app.append("<li>" + line.lineText + "</li>");
-	            });
-	            $app.append("</ul>");
-	            $app.append('<button id="randomize">Gimme another!</button>');
+	            var entryTemplateText = __webpack_require__(9);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+	            $app.append(compiledTemplate);
 	            
 	            $('#randomize').on("click", function(){
 	                window.location.reload();
@@ -273,12 +286,18 @@
 	    $buttons.html('');
 	    createHeader();
 	    
-	    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+	//This is the basic if we want to implemant a template    
+	/*    var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
+	    var template = _.template(entryTemplateText);
+	//verify what we have to define    var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+	    $app.append(compiledTemplate);
+	    
+	*/    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
 	    retrieval.getIncompleteStory().then(
-	        function(object) {
-	            var exist = object.exist;
-	            var storyId = object.storyId;
-	            var storyLength = object.storyLength;
+	        function(story) {
+	            var exist = story.exist;
+	            var storyId = story.storyId;
+	            var storyLength = story.storyLength;
 	            
 	            if (exist === false) {
 	                $app.append('There are no more stories to continue. Why not start a new one?');
@@ -286,11 +305,12 @@
 	            else {
 	                //gets all the lines from the story randomly chosen above
 	                retrieval.getLines(storyId).then(
-	                    function(result) {
+	                    function(linesOfSelectedStory) {
+	                        console.log(linesOfSelectedStory);
 	                        //gets the last written line of the story to continue
-	                        var lastLine = result.length;
-	                        console.log(result[lastLine - 1]);
-	                        var previousLine = result[lastLine - 1].lineText;
+	                        var lastLine = linesOfSelectedStory.length;
+	                        console.log(linesOfSelectedStory[lastLine - 1]);
+	                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
 	                        
 	                        $app.append("<h2>Story #" + storyId + "</h2>");
 	                        $app.append("<h3>Previous Line:</h3>");
@@ -330,12 +350,13 @@
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
+	    
+	    var entryTemplateText = __webpack_require__(10);
+	    var template = _.template(entryTemplateText);
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
 	    // $app.append('<h3>Thanks for your contribution!</h3>');
-	    $app.append('<h4>What would you like to do now?</h4>');
-	    $app.append('<a href="#continue"><button>Continue another story</button></a><br/>');
-	    $app.append('<a href="#create"><button>Create a new story</button></a><br/>');
-	    $app.append('<a href="#seeall"><button>Rate the other stories</button></a><br/>');
-	    $app.append('<a href="#random"><button>Read a story at random</button></a><br/>');
+	    
 	    createFooter();
 	}
 
@@ -2053,6 +2074,30 @@
 
 /***/ },
 /* 7 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>'\n\n<h3>How long will this story be?</h3>\n\n<form>\n    <div class=\"row\">\n        <div class=\"small-12 columns\">\n            <label>Compulsory</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"10\" id=\"ten\"><label for=\"ten\">10 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"15\" id=\"fifteen\"><label for=\"fifteen\">15 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"20\" id=\"twenty\"><label for=\"twenty\">20 lines</label>\n        </div>\n    </div>\n</form>\n\n"
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	module.exports = "<!--<h3>Write the story's first line below:</h3>-->\n\n<form>\n    <fieldset>\n        <legend>Write the story's first line below:</legend>\n            <div class=\"row\">\n                <div class=\"small-1 columns\">\n                    <label class=\"inline\">1.</label>\n                </div>\n                <div class=\"small-11 columns\">\n                    <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                </div>\n            </div>\n            <% for(var i = 0; i < numberOfLines - 1; i++) { %>\n                <div class=\"row\">\n                    <div class=\"small-1 columns\">\n                        <label class=\"inline\"><%= i+2 %>.</label>\n                    </div>\n                    <div class=\"small-11 columns\">\n                        <input type=\"text\" disabled/>\n                    </div>\n                </div>\n            <% } %>\n    </fieldset>\n</form>\n\n<button id=\"newStory\">Submit line</button>\n\n"
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<h3>One story, at random:</h3>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2071,7 +2116,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(8), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(12), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -3953,7 +3998,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 8 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!

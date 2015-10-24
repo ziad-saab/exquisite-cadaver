@@ -37,7 +37,6 @@ function deployingLayout() {
 
 //This function permits users to choose the length of a new story:
 
-var $numberOfLines = $('input .length').val();
 function createStoryLength() {
     $buttons.html('');
     $app.html('');
@@ -49,16 +48,19 @@ function createStoryLength() {
     
     createFooter();
     
-// The function that's triggered when the length button is clicked
-//This function makes appear the form (with the length choosen) where users write the first line of a new story
+    // The function that's triggered when the length button is clicked
+    //This function makes appear the form (with the length choosen) where users write the first line of a new story
     var $length = $('input .length');
-    console.log($numberOfLines);
-    $length.onclick = function createStoryText() {
-    var entryTemplateText = require('raw!../views/createStoryText.ejs');
-    var template = _.template(entryTemplateText);
-    var compiledTemplate = template({numberOfLines: $numberOfLines});
-    $app.append(compiledTemplate);
-    };
+    
+    // insert input element
+    // read about event delegation
+    $('delegation element goes here').on('click', 'input .length', function() {
+        var $numberOfLines = $('input .length').val();
+        var entryTemplateText = require('raw!../views/createStoryText.ejs');
+        var template = _.template(entryTemplateText);
+        var compiledTemplate = template({numberOfLines: $numberOfLines});
+        $app.append(compiledTemplate);
+    });
             
     //The ajax function that's triggered when the button in createStory is clicked
     $('#newStory').on("click", function(){
