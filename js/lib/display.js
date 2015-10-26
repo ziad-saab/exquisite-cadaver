@@ -109,17 +109,37 @@ function seeCompletedStories(pageNum) {
            
             stories.forEach(function(story){
                 var id = story.id;
+                var rating = story.rating;
+                
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
+                    $app.append("<img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
                     $app.append("<li>" + line.lineText + "</li>");
                     });
+                    console.log(rating);
+                    
+                    //Voting functions
+                    $('.upvoting').on("click", function(){
+                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
+                        alert("Thanks! Your vote was submitted.");
+                        window.location.reload();
+                    });
+                    
+                    $('.downvoting').on("click", function(){
+                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
+                        alert("Thanks! Your vote was submitted.");
+                        window.location.reload();
+                    });
+
                 });
+                
             });
             
             $app.append("</ul>");
+    
             return hasNextPage;
        } 
     ).then(
@@ -192,9 +212,8 @@ function getStoryToContinue() {
                     function(linesOfSelectedStory) {
                         console.log(linesOfSelectedStory);
                         //gets the last written line of the story to continue
-                        var lastLine = linesOfSelectedStory.length;
-                        console.log(linesOfSelectedStory[lastLine - 1]);
-                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
+                        var lastLine = result.length;
+                        var previousLine = result[lastLine - 1].lineText;
                         
                         $app.append("<h2>Story #" + storyId + "</h2>");
                         $app.append("<h3>Previous Line:</h3>");

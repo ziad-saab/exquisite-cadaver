@@ -228,17 +228,37 @@
 	           
 	            stories.forEach(function(story){
 	                var id = story.id;
+	                var rating = story.rating;
+	                
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
+	                    $app.append("<img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
 	                    $app.append("<li>" + line.lineText + "</li>");
 	                    });
+	                    console.log(rating);
+	                    
+	                    //Voting functions
+	                    $('.upvoting').on("click", function(){
+	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
+	                        alert("Thanks! Your vote was submitted.");
+	                        window.location.reload();
+	                    });
+	                    
+	                    $('.downvoting').on("click", function(){
+	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
+	                        alert("Thanks! Your vote was submitted.");
+	                        window.location.reload();
+	                    });
+
 	                });
+	                
 	            });
 	            
 	            $app.append("</ul>");
+	    
 	            return hasNextPage;
 	       } 
 	    ).then(
@@ -311,9 +331,8 @@
 	                    function(linesOfSelectedStory) {
 	                        console.log(linesOfSelectedStory);
 	                        //gets the last written line of the story to continue
-	                        var lastLine = linesOfSelectedStory.length;
-	                        console.log(linesOfSelectedStory[lastLine - 1]);
-	                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
+	                        var lastLine = result.length;
+	                        var previousLine = result[lastLine - 1].lineText;
 	                        
 	                        $app.append("<h2>Story #" + storyId + "</h2>");
 	                        $app.append("<h3>Previous Line:</h3>");
@@ -380,6 +399,7 @@
 	//Modify this variable after migrating the api to heroku
 	var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
+	var nbPerPage = 2;
 
 	// Data retrieval functions
 	function startNewStory(){
@@ -392,19 +412,19 @@
 	                    return {
 	                        newLineId: newLineId,
 	                        newStoryId: newStoryId
-	                    }
+	                    };
 	                }
-	            )
+	            );
 	        }
-	    )
+	    );
 	}
 
 	function getStoriesByRating(pageNum) {
-	    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * 2 + ',"limit":' + (2 + 1) + ',"where":{"incomplete":"false"}}').then(
+	    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * nbPerPage + ',"limit":' + (nbPerPage + 1) + ',"where":{"incomplete":"false"}}').then(
 	        function(result) {
-	            if (result.length > 2) {  //storyNb
+	            if (result.length > nbPerPage) {  //storyNb
 	                var hasNextPage = true;
-	                result = result.slice(0, 2); //storyNb
+	                result = result.slice(0, nbPerPage); //storyNb
 	            }
 	            else {
 	                hasNextPage = false;
@@ -2061,7 +2081,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <li class=\"active\"><a href=\"#\">LOGIN</a></li>\n        <li class=\"active\">\n          <a href=\"#\">SIGN UP NOW</a>\n        </li>\n      </ul>\n    </section>\n  </nav> \n</div>"
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <li class=\"active\"><a href=\"./login.html\">LOGIN</a></li>\n        <li class=\"active\">\n          <a href=\"./signup.html\">SIGN UP NOW</a>\n        </li>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
 
 /***/ },
 /* 5 */

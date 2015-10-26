@@ -17,6 +17,8 @@
     "backbone": "^1.2.3",
     "foundation": "^4.2.1-1",
     "jquery": "^2.1.4",
+    "raw": "^0.1.4",
+    "raw-loader": "^0.5.1",
     "require": "^2.4.20",
     "underscore": "^1.8.3",
     "webpack-dev-server": "^1.12.1"

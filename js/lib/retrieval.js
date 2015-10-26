@@ -2,6 +2,7 @@
 //Modify this variable after migrating the api to heroku
 var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
+var nbPerPage = 2;
 
 // Data retrieval functions
 function startNewStory(){
@@ -14,19 +15,19 @@ function startNewStory(){
                     return {
                         newLineId: newLineId,
                         newStoryId: newStoryId
-                    }
+                    };
                 }
-            )
+            );
         }
-    )
+    );
 }
 
 function getStoriesByRating(pageNum) {
-    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * 2 + ',"limit":' + (2 + 1) + ',"where":{"incomplete":"false"}}').then(
+    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * nbPerPage + ',"limit":' + (nbPerPage + 1) + ',"where":{"incomplete":"false"}}').then(
         function(result) {
-            if (result.length > 2) {  //storyNb
+            if (result.length > nbPerPage) {  //storyNb
                 var hasNextPage = true;
-                result = result.slice(0, 2); //storyNb
+                result = result.slice(0, nbPerPage); //storyNb
             }
             else {
                 hasNextPage = false;
