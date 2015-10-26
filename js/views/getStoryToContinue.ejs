@@ -1,25 +1,16 @@
 <a href="#"><button> Back to Main Menu </button></a>
-    retrieval.getIncompleteStory().then(
-        function(object) {
-            var exist = object.exist;
-            var storyId = object.storyId;
-            var storyLength = object.storyLength;
-            
-            if (exist === false) {
-                $app.append('There are no more stories to continue. Why not start a new one?');
-            }
-            else {
-                //gets all the lines from the story randomly chosen above
-                retrieval.getLines(storyId).then(
-                    function(result) {
-                        //gets the last written line of the story to continue
-                        var lastLine = result.length;
-                        console.log(result[lastLine - 1]);
-                        var previousLine = result[lastLine - 1].lineText;
-                        
-                        $app.append("<h2>Story #" + storyId + "</h2>");
-                        $app.append("<h3>Previous Line:</h3>");
-                        $app.append("<p>" + previousLine + "</p>");
-                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-                        $app.append("<button id='submit'>Submit line</button>");
+<h2>Story # <%= storyId %> </h2>
+<h3>Previous Line:</h3>
+    <p> <%= previousLine %> </p>
+
+<form>
+    <div class="row">
+        <div class="large-12 columns">
+            <label>You are writing line <%= (lastLine + 1) %> </label>
+                <input class="newLine" type="text" placeholder="Go crazy!" />
+        </div>
+    </div>
+</form>
+
+<button id='submit'>Submit line</button>
                         

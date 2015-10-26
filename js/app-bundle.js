@@ -64,7 +64,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(11);
+	var Backbone = __webpack_require__(12);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -179,13 +179,6 @@
 	        
 	    
 	        //The ajax function that's triggered when the button in createStory is clicked
-	       /* $('#newStory').on("click", function(){
-	            var newLine = $(this).val();
-	            console.log(newLine);
-	            //var newLine = $('.newLine').val();
-	            var lineNb = $('*[name=nbOfLines]:checked').val();
-	           */ 
-	           
 	        $('#newStory').on("click", function() {
 	        var newLine = $('input[class=newLine]').val();
 	        console.log(newLine);
@@ -291,7 +284,7 @@
 	            createHeader();
 	            var entryTemplateText = __webpack_require__(9);
 	            var template = _.template(entryTemplateText);
-	            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+	            var compiledTemplate = template({lines:lines, storyId:storyId});
 	            $app.append(compiledTemplate);
 	            
 	            $('#randomize').on("click", function(){
@@ -309,13 +302,9 @@
 	    $buttons.html('');
 	    createHeader();
 	    
-	//This is the basic if we want to implemant a template    
-	/*    var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
-	    var template = _.template(entryTemplateText);
-	//verify what we have to define    var compiledTemplate = template({'lines':lines, 'storyId':storyId});
-	    $app.append(compiledTemplate);
+
 	    
-	*/    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+	    //$app.append('<a href="#"><button> Back to Main Menu </button></a>');
 	    retrieval.getIncompleteStory().then(
 	        function(story) {
 	            var exist = story.exist;
@@ -329,17 +318,23 @@
 	                //gets all the lines from the story randomly chosen above
 	                retrieval.getLines(storyId).then(
 	                    function(linesOfSelectedStory) {
-	                        console.log(linesOfSelectedStory);
 	                        //gets the last written line of the story to continue
-	                        var lastLine = result.length;
-	                        var previousLine = result[lastLine - 1].lineText;
+	                        var lastLine = linesOfSelectedStory.length;
+	                        console.log(lastLine);
+	                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
 	                        
-	                        $app.append("<h2>Story #" + storyId + "</h2>");
+	                        //This is the template    
+	                        var entryTemplateText = __webpack_require__(10);
+	                        var template = _.template(entryTemplateText);
+	                        var compiledTemplate = template({previousLine:previousLine, storyId:storyId, lastLine:lastLine});
+	                        $app.append(compiledTemplate);
+	                                            
+	                       /* $app.append("<h2>Story #" + storyId + "</h2>");
 	                        $app.append("<h3>Previous Line:</h3>");
 	                        $app.append("<p>" + previousLine + "</p>");
 	                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
 	                        $app.append("<button id='submit'>Submit line</button>");
-	                        
+	                        */
 	                        //The ajax function that's triggered when the button is clicked
 	                        $('#submit').on("click", function(){
 	                            var newLine = $('.newLine').val();
@@ -373,7 +368,7 @@
 	    $app.html('');
 	    createHeader();
 	    
-	    var entryTemplateText = __webpack_require__(10);
+	    var entryTemplateText = __webpack_require__(11);
 	    var template = _.template(entryTemplateText);
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -2117,10 +2112,16 @@
 /* 10 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<h2>Story # <%= storyId %> </h2>\n<h3>Previous Line:</h3>\n    <p> <%= previousLine %> </p>\n\n<form>\n    <div class=\"row\">\n        <div class=\"large-12 columns\">\n            <label>You are writing line <%= (lastLine + 1) %> </label>\n                <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n        </div>\n    </div>\n</form>\n\n<button id='submit'>Submit line</button>\n                        "
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2139,7 +2140,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(12), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(13), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4021,7 +4022,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
