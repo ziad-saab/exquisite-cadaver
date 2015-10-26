@@ -1,0 +1,16 @@
+<a href="#"><button> Back to Main Menu </button></a>
+
+<h2>Story # <%= storyId  %> </h2>
+
+<h3>One story, at random:</h3>
+
+<ul class="no-bullet">
+
+    <% lines.forEach( function(line) { %>
+        <li><%= line.lineText %></li>
+    <% }); %>
+    
+</ul>
+
+<button id="randomize">Gimme another!</button>
+
