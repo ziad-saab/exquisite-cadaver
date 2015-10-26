@@ -156,7 +156,7 @@
 
 	//This function permits users to choose the length of a new story:
 
-	function createStoryLength() {
+	function createStory() {
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
@@ -170,11 +170,10 @@
 	    // The function that's triggered when the length button is clicked
 	    //This function makes appear the form (with the length choosen) where users write the first line of a new story
 	    var $length = $('input .length');
-	    
-	    // insert input element
-	    // read about event delegation
-	    $('delegation element goes here').on('click', 'input .length', function() {
-	        var $numberOfLines = $('input .length').val();
+	    console.log($length);
+
+	    $('#lengthOfStory').on('click', $length, function() {
+	        var $numberOfLines = $length.val();
 	        var entryTemplateText = __webpack_require__(8);
 	        var template = _.template(entryTemplateText);
 	        var compiledTemplate = template({numberOfLines: $numberOfLines});
@@ -2076,7 +2075,7 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>'\n\n<h3>How long will this story be?</h3>\n\n<form>\n    <div class=\"row\">\n        <div class=\"small-12 columns\">\n            <label>Compulsory</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"10\" id=\"ten\"><label for=\"ten\">10 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"15\" id=\"fifteen\"><label for=\"fifteen\">15 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"20\" id=\"twenty\"><label for=\"twenty\">20 lines</label>\n        </div>\n    </div>\n</form>\n\n"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>'\n\n<h3>How long will this story be?</h3>\n\n<form>\n    <div class=\"row\">\n        <div class=\"small-12 columns\" id=\"lengthOfStory\">\n            <label>Compulsory</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"10\" id=\"ten\"><label for=\"ten\">10 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"15\" id=\"fifteen\"><label for=\"fifteen\">15 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"20\" id=\"twenty\"><label for=\"twenty\">20 lines</label>\n        </div>\n    </div>\n</form>\n\n"
 
 /***/ },
 /* 8 */
