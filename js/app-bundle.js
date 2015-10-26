@@ -64,7 +64,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(4);
+	var Backbone = __webpack_require__(7);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -127,7 +127,7 @@
 	var $header = $('#header');
 	function createHeader(options) {
 	    $header.html('');
-	    var entryTemplateText = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"raw!../views/header.ejs\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	    var entryTemplateText = __webpack_require__(4);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $header.append(compiledTemplate);
@@ -137,7 +137,7 @@
 	var $footer = $('#footer');
 	function createFooter(options) {
 	    $footer.html('');
-	    var entryTemplateText = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"raw!../views/footer.ejs\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	    var entryTemplateText = __webpack_require__(5);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $footer.append(compiledTemplate);
@@ -147,7 +147,7 @@
 	var $layout = $('.aboutTheProjectAndRules hide');
 	function deployingLayout() {
 	    $layout.html('');
-	    var entryTemplateText = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"raw!../views/layout.ejs\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()))
+	    var entryTemplateText = __webpack_require__(6)
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $layout.append(compiledTemplate);
@@ -206,17 +206,37 @@
 	           
 	           result.forEach(function(story){
 	                var id = story.id;
+	                var rating = story.rating;
+	                
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
+	                    $app.append("<img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
 	                        $app.append("<li>" + line.lineText + "</li>");
 	                    });
+	                    console.log(rating);
+	                    
+	                    //Voting functions
+	                    $('.upvoting').on("click", function(){
+	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
+	                        alert("Thanks! Your vote was submitted.");
+	                        window.location.reload();
+	                    });
+	                    
+	                    $('.downvoting').on("click", function(){
+	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
+	                        alert("Thanks! Your vote was submitted.");
+	                        window.location.reload();
+	                    });
+
 	                });
+	                
 	            });
 	            
 	            $app.append("</ul>");
+	    
 	            return hasNextPage;
 	       } 
 	    ).then(
@@ -289,7 +309,6 @@
 	                    function(result) {
 	                        //gets the last written line of the story to continue
 	                        var lastLine = result.length;
-	                        console.log(result[lastLine - 1]);
 	                        var previousLine = result[lastLine - 1].lineText;
 	                        
 	                        $app.append("<h2>Story #" + storyId + "</h2>");
@@ -356,6 +375,7 @@
 	//Modify this variable after migrating the api to heroku
 	var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
+	var nbPerPage = 2;
 
 	// Data retrieval functions
 	function startNewStory(){
@@ -368,19 +388,19 @@
 	                    return {
 	                        newLineId: newLineId,
 	                        newStoryId: newStoryId
-	                    }
+	                    };
 	                }
-	            )
+	            );
 	        }
-	    )
+	    );
 	}
 
 	function getStoriesByRating(pageNum) {
-	    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * 2 + ',"limit":' + (2 + 1) + ',"where":{"incomplete":"false"}}').then(
+	    return $.getJSON(API_URL + 'Stories?filter={"order":"rating%20DESC","skip":' + pageNum * nbPerPage + ',"limit":' + (nbPerPage + 1) + ',"where":{"incomplete":"false"}}').then(
 	        function(result) {
-	            if (result.length > 2) {  //storyNb
+	            if (result.length > nbPerPage) {  //storyNb
 	                var hasNextPage = true;
-	                result = result.slice(0, 2); //storyNb
+	                result = result.slice(0, nbPerPage); //storyNb
 	            }
 	            else {
 	                hasNextPage = false;
@@ -2035,6 +2055,24 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <li class=\"active\"><a href=\"./login.html\">LOGIN</a></li>\n        <li class=\"active\">\n          <a href=\"./signup.html\">SIGN UP NOW</a>\n        </li>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"layout.ejs\" id=\"bottomButtonAbout class=\"button radius\">ABOUT & RULES</a>\n\n<!--Button that displays the about-rules layout -->\n\n<%var $layout = $('.aboutTheProjectAndRules');\n$('#bottomButtonAbout').click(function(e){\n    $layout.removeClass('hide').addClass('show animated slideInUp');\n     e.preventDefault();\n});\n\n//Button that closes the about-rules layout\n$('.buttonAboutClose').click(function(e){\n    $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');\n    setTimeout(function() {\n        $layout.removeClass('animated slideOutDown').addClass('hide');\n    }, 1000)\n    e.preventDefault();\n});%>"
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = "\t\t<div class=\"aboutTheProjectAndRules hide\" >\n\t\t\t<div id=\"aboutCover\"></div>\n\t\t\t\t<div id=\"aboutBottom\">\n\t\t\t\t\t<div id=\"aboutBottomContent\">\n\t\t\t\t\t\t<div class=\"aboutColumn\" id=\"aboutBottomContentHeader\">\n\t\t\t\t\t\t\t<div id=\"aboutBottomContentTitle\">ABOUT</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t\t<div class=\"aboutColumn\" id=\"aboutBottomContentBody\">\n\t\t\t\t\t\t    <p>Exquisite cadaver is the final project for the \n                                <a href=\"http://www.decodemtl.com/web-development-full-time/\">\n                                <img class=\"decodemtlLogo\" src=\"../images/decodemtl-logo-black.png\">\n                                </a>\n                                web development bootcamp.\n                            </p>\n                        </div>\n\t\t\t\t\t\t<ul class=\"aboutColumn\" id=\"aboutBottomContentCredits\">\n\t\t\t\t\t\t\t<li class=\"creditsTitle\">The back-end developer is: </li>\n\t\t\t\t\t\t\t<li><a href=\"http://cathe313.github.io/\">Catherine Ducharme</a></li>\n\t\t\t\t\t\t\t<li class=\"creditsTitle\">The front-end developper is: </li>\n\t\t\t\t\t\t\t<li>Marie-Eve Gauthier</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"aboutColumn\" id=\"rulesBottomContentHeader\">\n\t\t\t\t\t    <div id=\"rulesBottomContentTitle\">RULES</div>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"aboutColumn\" id=\"rulesBottomContentBody\">\n\t\t\t\t\t    <p> Exquisite cadaver is a game....</p>\n\t\t\t\t\t    <p>There are few rules but we are stricted about it</p>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class aboutColumn id=\"rulesBottomContentList\">\n\t\t\t\t\t    <ul class=\"aboutColumn\">\n\t\t\t\t\t        <li>Proper Spelling</li>\n\t\t\t\t\t        <li>No pubs</li>\n\t\t\t\t\t        <li>Respectful contents</li>\n\t\t\t\t\t        <li>No sms language neither smileys</li>\n\t\t\t\t\t        <li>A lot of creativy! </li>\n\t\t\t\t\t    </ul>\n\t\t\t\t\t</div>\n\t\t\t\t\t    <div class=\"letterTriangle\">\n\t\t\t\t\t\t    <a class=\"buttonAboutClose\" href=\"#\">X</a>\n\t\t\t\t\t\t</div>\n\t\t    </div>\n\t\t</div>"
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2053,7 +2091,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(5), __webpack_require__(6), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(8), __webpack_require__(9), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -3935,7 +3973,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -5489,7 +5527,7 @@
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
