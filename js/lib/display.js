@@ -41,54 +41,48 @@ function createStory() {
     $buttons.html('');
     $app.html('');
     createHeader();
-    var $length;
     var entryTemplateText = require('raw!../views/createStoryLength.ejs');
     var template = _.template(entryTemplateText);
     var compiledTemplate = template();
     $app.append(compiledTemplate);
     
     createFooter();
-    
+   
     // The function that's triggered when the length button is clicked
     //This function makes appear the form (with the length choosen) where users write the first line of a new story
-    var $lengthOfStory = function(evt) {
-        var $this = $(evt.target);
-        var $length = $this.val();
-    };
-    console.log($length);
-    
-    //editSomething: function(evt) {
-    //    var $this = $(evt.target);
-    //    var origText = $this.text();
-    //    $this.replaceWith('<input class="edit-input" type="text" value="' + origText + '">');
-   // },
-
-    $('#lengthOfStory').on('click', $length, function() {
-        var $numberOfLines = $length.val();
+    $(".length").on('click', function() {
+        var numberOfLines = $(this).val();
         var entryTemplateText = require('raw!../views/createStoryText.ejs');
         var template = _.template(entryTemplateText);
-        var compiledTemplate = template({numberOfLines: $numberOfLines});
+        var compiledTemplate = template({numberOfLines: numberOfLines});
         $app.append(compiledTemplate);
-    });
-            
-    //The ajax function that's triggered when the button in createStory is clicked
-    $('#newStory').on("click", function(){
-        var newLine = $('.newLine').val();
-        var lineNb = $('*[name=nbOfLines]:checked').val();
+        $('.length').off('click');
         
+    
+        //The ajax function that's triggered when the button in createStory is clicked
+       /* $('#newStory').on("click", function(){
+            var newLine = $(this).val();
+            console.log(newLine);
+            //var newLine = $('.newLine').val();
+            var lineNb = $('*[name=nbOfLines]:checked').val();
+           */ 
+           
+        $('#newStory').on("click", function() {
+        var newLine = $('input[class=newLine]').val();
+        console.log(newLine);
+    
         if (!newLine || newLine.length < 1) {
             alert("You haven't entered anything!");
         }
-        else if (!lineNb || lineNb === undefined ) {
-            alert("You must choose a length");
-        }
         else {
-            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': lineNb, 'lineText': newLine}});
-            alert("Thanks! Your new story was submitted.");
-            window.location.href = "#choice";
+                $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine}});
+                alert("Thanks! Your new story was submitted.");
+                window.location.href = "#choice";
         }
-        }
-    );
+        });
+    });
+        
+
 }
 
 

@@ -166,38 +166,42 @@
 	    $app.append(compiledTemplate);
 	    
 	    createFooter();
-	    
+	   
 	    // The function that's triggered when the length button is clicked
 	    //This function makes appear the form (with the length choosen) where users write the first line of a new story
-	    var $length = $('input .length');
-	    console.log($length);
-
-	    $('#lengthOfStory').on('click', $length, function() {
-	        var $numberOfLines = $length.val();
+	    $(".length").on('click', function() {
+	        var numberOfLines = $(this).val();
 	        var entryTemplateText = __webpack_require__(8);
 	        var template = _.template(entryTemplateText);
-	        var compiledTemplate = template({numberOfLines: $numberOfLines});
+	        var compiledTemplate = template({numberOfLines: numberOfLines});
 	        $app.append(compiledTemplate);
-	    });
-	            
-	    //The ajax function that's triggered when the button in createStory is clicked
-	    $('#newStory').on("click", function(){
-	        var newLine = $('.newLine').val();
-	        var lineNb = $('*[name=nbOfLines]:checked').val();
+	        $('.length').off('click');
 	        
+	    
+	        //The ajax function that's triggered when the button in createStory is clicked
+	       /* $('#newStory').on("click", function(){
+	            var newLine = $(this).val();
+	            console.log(newLine);
+	            //var newLine = $('.newLine').val();
+	            var lineNb = $('*[name=nbOfLines]:checked').val();
+	           */ 
+	           
+	        $('#newStory').on("click", function() {
+	        var newLine = $('input[class=newLine]').val();
+	        console.log(newLine);
+	    
 	        if (!newLine || newLine.length < 1) {
 	            alert("You haven't entered anything!");
 	        }
-	        else if (!lineNb || lineNb === undefined ) {
-	            alert("You must choose a length");
-	        }
 	        else {
-	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': lineNb, 'lineText': newLine}});
-	            alert("Thanks! Your new story was submitted.");
-	            window.location.href = "#choice";
+	                $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine}});
+	                alert("Thanks! Your new story was submitted.");
+	                window.location.href = "#choice";
 	        }
-	        }
-	    );
+	        });
+	    });
+	        
+
 	}
 
 
@@ -448,7 +452,7 @@
 	    var arrayOfStories = [];
 	    return $.getJSON(API_URL + 'Stories').then(
 	        function(result) {
-	            //collects in an array the ids of the stories that have been completed
+	            //collects in an array the ids of the stories that haven't been completed
 	            result.forEach(function(story) {
 	                if (story.incomplete === true) {
 	                    arrayOfStories.push(story.id);
@@ -2075,13 +2079,13 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>'\n\n<h3>How long will this story be?</h3>\n\n<form>\n    <div class=\"row\">\n        <div class=\"small-12 columns\" id=\"lengthOfStory\">\n            <label>Compulsory</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"10\" id=\"ten\"><label for=\"ten\">10 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"15\" id=\"fifteen\"><label for=\"fifteen\">15 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"20\" id=\"twenty\"><label for=\"twenty\">20 lines</label>\n        </div>\n    </div>\n</form>\n\n"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>'\n\n<h3>How long will this story be?</h3>\n\n<form>\n    <div class=\"row\">\n        <div class=\"small-12 columns\">\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"10\" id=\"ten\"><label for=\"ten\">10 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"15\" id=\"fifteen\"><label for=\"fifteen\">15 lines</label>\n              <input class=\"length\" type=\"radio\" name=\"nbOfLines\" value=\"20\" id=\"twenty\"><label for=\"twenty\">20 lines</label>\n        </div>\n    </div>\n</form>\n\n"
 
 /***/ },
 /* 8 */
 /***/ function(module, exports) {
 
-	module.exports = "<!--<h3>Write the story's first line below:</h3>-->\n\n<form>\n    <fieldset>\n        <legend>Write the story's first line below:</legend>\n            <div class=\"row\">\n                <div class=\"small-1 columns\">\n                    <label class=\"inline\">1.</label>\n                </div>\n                <div class=\"small-11 columns\">\n                    <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                </div>\n            </div>\n            <% for(var i = 0; i < numberOfLines - 1; i++) { %>\n                <div class=\"row\">\n                    <div class=\"small-1 columns\">\n                        <label class=\"inline\"><%= i+2 %>.</label>\n                    </div>\n                    <div class=\"small-11 columns\">\n                        <input type=\"text\" disabled/>\n                    </div>\n                </div>\n            <% } %>\n    </fieldset>\n</form>\n\n<button id=\"newStory\">Submit line</button>\n\n"
+	module.exports = "\n\n<form>\n    <fieldset>\n        <legend>Write the story's first line below:</legend>\n            <div class=\"row\">\n                <div class=\"small-1 columns\">\n                    <label class=\"inline\">1.</label>\n                </div>\n                <div class=\"small-11 columns\">\n                    <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                </div>\n            </div>\n            <% for(var i = 0; i < numberOfLines - 1; i++) { %>\n                <div class=\"row\">\n                    <div class=\"small-1 columns\">\n                        <label class=\"inline\"><%= i+2 %>.</label>\n                    </div>\n                    <div class=\"small-11 columns\">\n                        <input type=\"text\" disabled/>\n                    </div>\n                </div>\n            <% } %>\n    </fieldset>\n</form>\n\n<button id=\"newStory\">Submit line</button>\n\n"
 
 /***/ },
 /* 9 */

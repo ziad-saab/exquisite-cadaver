@@ -74,7 +74,7 @@ function getIncompleteStory(){
     var arrayOfStories = [];
     return $.getJSON(API_URL + 'Stories').then(
         function(result) {
-            //collects in an array the ids of the stories that have been completed
+            //collects in an array the ids of the stories that haven't been completed
             result.forEach(function(story) {
                 if (story.incomplete === true) {
                     arrayOfStories.push(story.id);
