@@ -54,7 +54,7 @@ function createStory() {
         var numberOfLines = $(this).val();
         var entryTemplateText = require('raw!../views/createStoryText.ejs');
         var template = _.template(entryTemplateText);
-        var compiledTemplate = template({numberOfLines: numberOfLines});
+        var compiledTemplate = template({'numberOfLines': numberOfLines});
         $app.append(compiledTemplate);
         $('.length').off('click');
         
@@ -165,7 +165,7 @@ function seeCompletedStory(){
             createHeader();
             var entryTemplateText = require('raw!../views/seeCompletedStory.ejs');
             var template = _.template(entryTemplateText);
-            var compiledTemplate = template({lines:lines, storyId:storyId});
+            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
             $app.append(compiledTemplate);
             
             $('#randomize').on("click", function(){
@@ -191,6 +191,7 @@ function getStoryToContinue() {
             var exist = story.exist;
             var storyId = story.storyId;
             var storyLength = story.storyLength;
+            console.log("storyLength =" + storyLength);
             
             if (exist === false) {
                 $app.append('There are no more stories to continue. Why not start a new one?');
@@ -199,23 +200,22 @@ function getStoryToContinue() {
                 //gets all the lines from the story randomly chosen above
                 retrieval.getLines(storyId).then(
                     function(linesOfSelectedStory) {
+                        console.log("linesOfSelectedStory = " , linesOfSelectedStory);
                         //gets the last written line of the story to continue
                         var lastLine = linesOfSelectedStory.length;
-                        console.log(lastLine);
-                        var previousLine = linesOfSelectedStory[lastLine - 1].lineText;
+                        console.log("lastline =" , lastLine);
+                        
+                        
+                        var previousLine = lastLine !== 0? linesOfSelectedStory[lastLine - 1].lineText: 0;
+                        console.log("previousLine =" , previousLine);
                         
                         //This is the template    
                         var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
                         var template = _.template(entryTemplateText);
-                        var compiledTemplate = template({previousLine:previousLine, storyId:storyId, lastLine:lastLine});
+                        var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
                         $app.append(compiledTemplate);
-                                            
-                       /* $app.append("<h2>Story #" + storyId + "</h2>");
-                        $app.append("<h3>Previous Line:</h3>");
-                        $app.append("<p>" + previousLine + "</p>");
-                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-                        $app.append("<button id='submit'>Submit line</button>");
-                        */
+                                        
+                     
                         //The ajax function that's triggered when the button is clicked
                         $('#submit').on("click", function(){
                             var newLine = $('.newLine').val();
