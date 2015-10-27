@@ -3,7 +3,7 @@ var retrieval = require('./retrieval.js');
 var _ = require("underscore");
 var $app = $('#app');
 var $buttons = $('#buttons');
-
+// var accessToken;
 
 //This function creates the header in each view 
 var $header = $('#header');
@@ -11,7 +11,7 @@ function createHeader(options) {
     $header.html('');
     var entryTemplateText = require('raw!../views/header.ejs');
     var template = _.template( entryTemplateText );
-    var compiledTemplate = template();
+    var compiledTemplate = template({'accessToken': -1});
     $header.append(compiledTemplate);
 }
 
@@ -136,9 +136,7 @@ function seeCompletedStories(pageNum) {
                 });
                 
             });
-            
-            // $app.append("</ul>");
-    
+
             return hasNextPage;
        } 
     ).then(
@@ -266,10 +264,108 @@ function nextSteps() {
     createFooter();
 }
 
+
+function userLogin() {
+    $buttons.html('');
+    $app.html('');
+    createHeader();
+    var entryTemplateText = require('raw!../views/login.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
+    
+    // $('.pass').bind('keypress', function(e) {
+    //     if (e.which == 13) {
+    //         $('#signin').click();
+    //     }
+    // });
+    
+    $(".signin").on('click' || 'keypress', function(){
+        var email = $('input[class=email]').val();
+        var password = $('input[class=pass]').val();
+        
+        if (email === undefined || password === undefined) {
+            alert("Please enter your username and password.");
+        }
+        else {
+            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
+                function (res){
+                    var accessToken = res.id;
+                    var userId = res.userId;
+                    alert("Welcome back!");
+                    window.location.href="app.html";
+                    return {
+                        'userId':userId,
+                        'accessToken': accessToken
+                    };
+                }
+                
+            );
+        }
+    });
+    
+    createFooter();
+}
+
+
+function userReg() {
+    $buttons.html('');
+    $app.html('');
+    createHeader();
+    var entryTemplateText = require('raw!../views/register.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
+    
+    // $('#password2').bind('keypress', function(e) {
+    //     if (e.which == 13) {
+    //         $('#signin').click();
+    //     }
+    // });
+    
+    $(".signup").on('click' || 'keypress', function(){
+        var username = $('input[class=user]').val();
+        var email = $('input[class=email]').val();
+        var password = $('input[class=password]').val();
+        var password2 = $('input[class=confirmPassword]').val();
+          
+        if (email === "" || email === null || username === "" || username === null) {
+            alert("Please provide a username and email.");
+        }
+        else if (password !== password2) {
+            alert("Passwords don't match!");
+        }
+        else if (password.length < 8) {
+            alert("Please choose a password with at least 8 characters.");
+        }
+        else {
+            $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
+                function(result) {
+                    console.log(result.response);
+                    if (result.response.error) {
+                      alert("Someone is already using this username or email.");
+                    }
+                    else {
+                      alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
+                      window.location.href="app.html";
+                    }
+            });
+              
+        }
+    });        
+    
+    createFooter();
+    
+}
+
+
 module.exports = {
     'createStory': createStory,
     'seeCompletedStories': seeCompletedStories,
     'seeCompletedStory': seeCompletedStory,
     'getStoryToContinue': getStoryToContinue,
-    'nextSteps': nextSteps
+    'nextSteps': nextSteps,
+    'userLogin': userLogin,
+    'userReg': userReg,
+    // 'accessToken': accessToken
 };

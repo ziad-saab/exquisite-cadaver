@@ -1,11 +1,4 @@
-// var loopback = require('loopback');
 $(document).foundation();
-
-// function context(){
-//     loopback.getCurrentContext();
-// }
-// context();
-
 
 // Button that displays the about-rules layout 
 var $layout = $('.aboutTheProjectAndRules');
@@ -23,8 +16,10 @@ $('body').on("click", '.buttonAboutClose', function(e){
     e.preventDefault();
 });
 
-var retrieval = require('./lib/display.js');
+var display = require('./lib/display.js');
 var Backbone = require('backbone');
+// var accessToken = display.accessToken;
+// console.log(accessToken + " from app.js");
 
 var router = Backbone.Router.extend({
     routes: {
@@ -33,35 +28,43 @@ var router = Backbone.Router.extend({
         'continue': 'continueCadaver',
         'seeall(/p:pageNum)': 'readCadavers',
         'random': 'readCadaver',
-        'choice': 'nextSteps'
-        // 'ab/addressbooks/:id1(/:pageNum)/entry/:id2': 'showEntry'
+        'choice': 'nextSteps',
+        'login': 'login',
+        'register': 'register'
     },
-    // homePage: function() {
-    //     this.navigate('ab', {trigger: true});
-    // },
     homePage: function() {
         this.navigate('choice', {trigger: true});
     },
     newCadaver: function() {
-        retrieval.createStory();
+        display.createStory();
     },
     continueCadaver: function() {
-        retrieval.getStoryToContinue();
+        display.getStoryToContinue();
     },
     readCadaver: function (){
-        retrieval.seeCompletedStory();
+        display.seeCompletedStory();
     },
     readCadavers: function(pageNum) {
         var storyNb = 5;
         if (pageNum) {
-            retrieval.seeCompletedStories(+pageNum, storyNb);
+            display.seeCompletedStories(+pageNum, storyNb);
         }
         else {
-            retrieval.seeCompletedStories(0);
+            display.seeCompletedStories(0);
         }
     },
     nextSteps: function() {
-        retrieval.nextSteps();
+        display.nextSteps();
+    },
+    login: function() {
+        display.userLogin().then(
+            function (userInfo) {
+                console.log(userInfo);
+            }
+        )
+    },
+    register: function() {
+        display.userReg();
     }
 });
 

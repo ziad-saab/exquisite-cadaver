@@ -9,10 +9,12 @@
     <section class="top-bar-section"> 
        <!--Right Nav Section -->
       <ul class="right">
-        <li class="active"><a href="./login.html">LOGIN</a></li>
-        <li class="active">
-          <a href="./signup.html">SIGN UP NOW</a>
-        </li>
+        <% if (accessToken === -1) { %>
+          <li class="active"><a href="#login">LOGIN</a></li>
+          <li class="active"><a href="#register">REGISTER</a></li>
+        <% } else {%>
+          <li class="active"><a href="#logout">LOGOUT</a></li>
+        <% } %>
       </ul>
     </section>
   </nav> 

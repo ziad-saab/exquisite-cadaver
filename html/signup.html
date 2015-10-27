@@ -87,13 +87,13 @@
           }
           else {
               $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
-                  function(returns) {
-                    console.log(returns.arg);
-                    if (returns.error) {
+                  function(result) {
+                    console.log(result.response);
+                    if (result.response.error) {
                       alert("Someone is already using this username or email.");
                     }
                     else {
-                      alert("We sent you a confirmation link by email. Click on it to complete your registration. Welcome to Exquisite Cadaver!");
+                      alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
                       window.location.href="app.html";
                     }
               });

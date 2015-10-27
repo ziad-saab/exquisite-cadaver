@@ -44,14 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// var loopback = require('loopback');
 	$(document).foundation();
-
-	// function context(){
-	//     loopback.getCurrentContext();
-	// }
-	// context();
-
 
 	// Button that displays the about-rules layout 
 	var $layout = $('.aboutTheProjectAndRules');
@@ -69,8 +62,10 @@
 	    e.preventDefault();
 	});
 
-	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(12);
+	var display = __webpack_require__(1);
+	var Backbone = __webpack_require__(14);
+	// var accessToken = display.accessToken;
+	// console.log(accessToken + " from app.js");
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -79,35 +74,43 @@
 	        'continue': 'continueCadaver',
 	        'seeall(/p:pageNum)': 'readCadavers',
 	        'random': 'readCadaver',
-	        'choice': 'nextSteps'
-	        // 'ab/addressbooks/:id1(/:pageNum)/entry/:id2': 'showEntry'
+	        'choice': 'nextSteps',
+	        'login': 'login',
+	        'register': 'register'
 	    },
-	    // homePage: function() {
-	    //     this.navigate('ab', {trigger: true});
-	    // },
 	    homePage: function() {
 	        this.navigate('choice', {trigger: true});
 	    },
 	    newCadaver: function() {
-	        retrieval.createStory();
+	        display.createStory();
 	    },
 	    continueCadaver: function() {
-	        retrieval.getStoryToContinue();
+	        display.getStoryToContinue();
 	    },
 	    readCadaver: function (){
-	        retrieval.seeCompletedStory();
+	        display.seeCompletedStory();
 	    },
 	    readCadavers: function(pageNum) {
 	        var storyNb = 5;
 	        if (pageNum) {
-	            retrieval.seeCompletedStories(+pageNum, storyNb);
+	            display.seeCompletedStories(+pageNum, storyNb);
 	        }
 	        else {
-	            retrieval.seeCompletedStories(0);
+	            display.seeCompletedStories(0);
 	        }
 	    },
 	    nextSteps: function() {
-	        retrieval.nextSteps();
+	        display.nextSteps();
+	    },
+	    login: function() {
+	        display.userLogin().then(
+	            function (userInfo) {
+	                console.log(userInfo);
+	            }
+	        )
+	    },
+	    register: function() {
+	        display.userReg();
 	    }
 	});
 
@@ -128,7 +131,7 @@
 	var _ = __webpack_require__(3);
 	var $app = $('#app');
 	var $buttons = $('#buttons');
-
+	// var accessToken;
 
 	//This function creates the header in each view 
 	var $header = $('#header');
@@ -136,7 +139,7 @@
 	    $header.html('');
 	    var entryTemplateText = __webpack_require__(4);
 	    var template = _.template( entryTemplateText );
-	    var compiledTemplate = template();
+	    var compiledTemplate = template({'accessToken': -1});
 	    $header.append(compiledTemplate);
 	}
 
@@ -261,9 +264,7 @@
 	                });
 	                
 	            });
-	            
-	            // $app.append("</ul>");
-	    
+
 	            return hasNextPage;
 	       } 
 	    ).then(
@@ -391,12 +392,110 @@
 	    createFooter();
 	}
 
+
+	function userLogin() {
+	    $buttons.html('');
+	    $app.html('');
+	    createHeader();
+	    var entryTemplateText = __webpack_require__(12);
+	    var template = _.template( entryTemplateText );
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
+	    
+	    // $('.pass').bind('keypress', function(e) {
+	    //     if (e.which == 13) {
+	    //         $('#signin').click();
+	    //     }
+	    // });
+	    
+	    $(".signin").on('click' || 'keypress', function(){
+	        var email = $('input[class=email]').val();
+	        var password = $('input[class=pass]').val();
+	        
+	        if (email === undefined || password === undefined) {
+	            alert("Please enter your username and password.");
+	        }
+	        else {
+	            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
+	                function (res){
+	                    var accessToken = res.id;
+	                    var userId = res.userId;
+	                    alert("Welcome back!");
+	                    window.location.href="app.html";
+	                    return {
+	                        'userId':userId,
+	                        'accessToken': accessToken
+	                    };
+	                }
+	                
+	            );
+	        }
+	    });
+	    
+	    createFooter();
+	}
+
+
+	function userReg() {
+	    $buttons.html('');
+	    $app.html('');
+	    createHeader();
+	    var entryTemplateText = __webpack_require__(13);
+	    var template = _.template( entryTemplateText );
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
+	    
+	    // $('#password2').bind('keypress', function(e) {
+	    //     if (e.which == 13) {
+	    //         $('#signin').click();
+	    //     }
+	    // });
+	    
+	    $(".signup").on('click' || 'keypress', function(){
+	        var username = $('input[class=user]').val();
+	        var email = $('input[class=email]').val();
+	        var password = $('input[class=password]').val();
+	        var password2 = $('input[class=confirmPassword]').val();
+	          
+	        if (email === "" || email === null || username === "" || username === null) {
+	            alert("Please provide a username and email.");
+	        }
+	        else if (password !== password2) {
+	            alert("Passwords don't match!");
+	        }
+	        else if (password.length < 8) {
+	            alert("Please choose a password with at least 8 characters.");
+	        }
+	        else {
+	            $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
+	                function(result) {
+	                    console.log(result.response);
+	                    if (result.response.error) {
+	                      alert("Someone is already using this username or email.");
+	                    }
+	                    else {
+	                      alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
+	                      window.location.href="app.html";
+	                    }
+	            });
+	              
+	        }
+	    });        
+	    
+	    createFooter();
+	    
+	}
+
+
 	module.exports = {
 	    'createStory': createStory,
 	    'seeCompletedStories': seeCompletedStories,
 	    'seeCompletedStory': seeCompletedStory,
 	    'getStoryToContinue': getStoryToContinue,
-	    'nextSteps': nextSteps
+	    'nextSteps': nextSteps,
+	    'userLogin': userLogin,
+	    'userReg': userReg,
+	    // 'accessToken': accessToken
 	};
 
 
@@ -2105,7 +2204,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <li class=\"active\"><a href=\"./login.html\">LOGIN</a></li>\n        <li class=\"active\">\n          <a href=\"./signup.html\">SIGN UP NOW</a>\n        </li>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% if (accessToken === -1) { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
 
 /***/ },
 /* 5 */
@@ -2151,6 +2250,18 @@
 
 /***/ },
 /* 12 */
+/***/ function(module, exports) {
+
+	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Welcome Back! </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns \">\n                            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n                        </div>\n                        <div class=\"small-10 columns \">\n                            <input class=\"pass\" type=\"password\" placeholder=\"password\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"signin\">Sign in! </button>\n                <p>Don't have an account? <a href=\"./signup.html\">Sign up here &raquo</a></p>\n            </div>\n        </div>\n    </div>\n\n\n    "
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Sign Up </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2  columns\">\n            <span class=\"prefix\"><i class=\"fi-torso-female\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"user\" type=\"text\" placeholder=\"username\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns\">\n            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"email\" type=\"text\" placeholder=\"email\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"password\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"signup\">Sign Up! </button>\n      <p>Already have an account? <a href=\"./login.html\">Login here &raquo</a></p>\n    </div>\n  </div>\n</div>"
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2169,7 +2280,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(13), __webpack_require__(14), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(15), __webpack_require__(16), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4051,7 +4162,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -5605,7 +5716,7 @@
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!

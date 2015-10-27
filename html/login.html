@@ -64,7 +64,9 @@
             else {
                 $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
                     function (res){
-                        console.log(res);
+                        var accessToken = res.id;
+                        var userId = res.userId;
+                        console.log(accessToken, userId);
                         alert("Welcome back!");
                         window.location.href="app.html";
                     }
