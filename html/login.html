@@ -63,7 +63,8 @@
             }
             else {
                 $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
-                    function (){
+                    function (res){
+                        console.log(res);
                         alert("Welcome back!");
                         window.location.href = "#choice";
                     }
