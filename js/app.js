@@ -1,4 +1,11 @@
+// var loopback = require('loopback');
 $(document).foundation();
+
+// function context(){
+//     loopback.getCurrentContext();
+// }
+// context();
+
 
 // Button that displays the about-rules layout 
 var $layout = $('.aboutTheProjectAndRules');

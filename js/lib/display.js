@@ -1,4 +1,5 @@
 var retrieval = require('./retrieval.js');
+// var loopback = require('loopback');
 var _ = require("underscore");
 var $app = $('#app');
 var $buttons = $('#buttons');
@@ -109,12 +110,15 @@ function seeCompletedStories(pageNum) {
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
+                    $app.append("<h3>Rating: " + rating + "</h3>");
                     $app.append("<img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
-                    $app.append("<li>" + line.lineText + "</li>");
+                    $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.userId + "</i></li>");
                     });
-                    console.log(rating);
+                    
+                    // var user = loopback.getCurrentContext().get('currentUser');     
+                    // console.user(user);
                     
                     //Voting functions
                     $('.upvoting' + id).on("click", function(){
@@ -133,7 +137,7 @@ function seeCompletedStories(pageNum) {
                 
             });
             
-            $app.append("</ul>");
+            // $app.append("</ul>");
     
             return hasNextPage;
        } 

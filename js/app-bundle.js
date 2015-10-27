@@ -44,7 +44,14 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// var loopback = require('loopback');
 	$(document).foundation();
+
+	// function context(){
+	//     loopback.getCurrentContext();
+	// }
+	// context();
+
 
 	// Button that displays the about-rules layout 
 	var $layout = $('.aboutTheProjectAndRules');
@@ -117,6 +124,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var retrieval = __webpack_require__(2);
+	// var loopback = require('loopback');
 	var _ = __webpack_require__(3);
 	var $app = $('#app');
 	var $buttons = $('#buttons');
@@ -227,12 +235,15 @@
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
+	                    $app.append("<h3>Rating: " + rating + "</h3>");
 	                    $app.append("<img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
-	                    $app.append("<li>" + line.lineText + "</li>");
+	                    $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.userId + "</i></li>");
 	                    });
-	                    console.log(rating);
+	                    
+	                    // var user = loopback.getCurrentContext().get('currentUser');     
+	                    // console.user(user);
 	                    
 	                    //Voting functions
 	                    $('.upvoting' + id).on("click", function(){
@@ -251,7 +262,7 @@
 	                
 	            });
 	            
-	            $app.append("</ul>");
+	            // $app.append("</ul>");
 	    
 	            return hasNextPage;
 	       } 
@@ -438,8 +449,23 @@
 
 	function getStoriesLines(story) {
 	    var id = story.id;
-	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":"lineText"}');
+	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId"]}');
+	    // .then(
+	    //     function(result){
+	    //         var userId = result.userId;
+	    //         var lineText = result.lineText;
+	            
+	    //         $.getJSON(API_URL + 'user/' + userId)
+	            
+	    //         return {
+	    //             lineText: lineText,
+	    //             username: 
+	    //         }
+	    //     }    
+	    // );
 	}
+
+
 
 	function getRandomStory() {
 	    var arrayOfStories = [];
@@ -2121,7 +2147,7 @@
 /* 11 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<h4>What would you like to do now?</h4>\n<a class=\"menu\" href=\"#continue\"><button>Continue another story</button></a><br/>\n<a class=\"menu\" href=\"#create\"><button>Create a new story</button></a><br/>\n<a class=\"menu\" href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a class=\"menu\" href=\"#random\"><button>Read a story at random</button></a><br/>"
 
 /***/ },
 /* 12 */

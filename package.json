@@ -16,7 +16,10 @@
   "dependencies": {
     "backbone": "^1.2.3",
     "foundation": "^4.2.1-1",
+    "fs": "0.0.2",
     "jquery": "^2.1.4",
+    "loopback": "^2.22.2",
+    "loopback-datasource-juggler": "^2.41.0",
     "raw": "^0.1.4",
     "raw-loader": "^0.5.1",
     "require": "^2.4.20",

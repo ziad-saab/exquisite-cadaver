@@ -43,8 +43,23 @@ function getStoriesByRating(pageNum) {
 
 function getStoriesLines(story) {
     var id = story.id;
-    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":"lineText"}');
+    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId"]}');
+    // .then(
+    //     function(result){
+    //         var userId = result.userId;
+    //         var lineText = result.lineText;
+            
+    //         $.getJSON(API_URL + 'user/' + userId)
+            
+    //         return {
+    //             lineText: lineText,
+    //             username: 
+    //         }
+    //     }    
+    // );
 }
+
+
 
 function getRandomStory() {
     var arrayOfStories = [];
