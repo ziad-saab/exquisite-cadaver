@@ -1,5 +1,5 @@
-var retrieval = require('./retrieval.js')
-var _ = require("underscore")
+var retrieval = require('./retrieval.js');
+var _ = require("underscore");
 var $app = $('#app');
 var $buttons = $('#buttons');
 
@@ -70,12 +70,14 @@ function createStory() {
         $('#newStory').on("click", function() {
         var newLine = $('input[class=newLine]').val();
         console.log(newLine);
+        
+        var userId = 1;
     
         if (!newLine || newLine.length < 1) {
             alert("You haven't entered anything!");
         }
         else {
-                $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine}});
+                $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
                 alert("Thanks! Your new story was submitted.");
                 window.location.href = "#choice";
         }
@@ -224,12 +226,13 @@ function getStoryToContinue() {
                         //The ajax function that's triggered when the button is clicked
                         $('#submit').on("click", function(){
                             var newLine = $('.newLine').val();
+                            var userId = 1;
                             
                             if (newLine === undefined || newLine.length < 1) {
                                 alert("You haven't entered anything!");
                             }
                             else {
-                                $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine}});
+                                $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
                                 
                                 if (storyLength === (lastLine + 1)) {
                                     $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});

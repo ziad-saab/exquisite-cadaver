@@ -22,7 +22,7 @@
                             <span class="prefix"><i class="fi-mail"></i></span>
                         </div>
                         <div class="small-10  columns">
-                            <input type="text" placeholder="email">
+                            <input class= "email" type="text" placeholder="email">
                         </div>
                     </div>
                     <div class="row collapse">
@@ -30,11 +30,11 @@
                             <span class="prefix"><i class="fi-lock"></i></span>
                         </div>
                         <div class="small-10 columns ">
-                            <input type="text" placeholder="password">
+                            <input class="pass" type="password" placeholder="password">
                         </div>
                     </div>
                 </form>
-                <a href="#" class="button ">Sign in! </a>
+                <a class="button ">Sign in! </a>
                 <p>Don't have an account? <a href="./signup.html">Sign up here &raquo</a></p>
             </div>
         </div>
@@ -48,11 +48,34 @@
 
     <div id="layout"></div>
 
-
-
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/foundation/js/foundation.min.js"></script>
     <script src="../js/app-bundle.js"></script>
+    
+    <script>
+    
+        $(".button").on('click', function(){
+            var email = $('input[class=email]').val();
+            var password = $('input[class=pass]').val();
+            
+            if (email === undefined || password === undefined) {
+                alert("Please enter your username and password.");
+            }
+            else {
+                $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
+                    function (){
+                        alert("Welcome back!");
+                        window.location.href = "#choice";
+                    }
+                    
+                )
+                    
+            }
+
+          
+        });
+    </script>
+    
 </body>
 
 </html>
