@@ -15,7 +15,7 @@
                    <% if(i === lastLine) {  %>
                         <input class="newLine" type="text" placeholder="Go crazy!" />
                     <% } else if(i === lastLine - 1) { %>
-                        <input class="previousLine" type="text" disabled placeholder="<%= previousLine %>"/>   
+                        <input class="previousLine" type="text" disabled placeholder="<%= linesOfSelectedStory[lastLine - 1].lineText %>"/>   
                     <% } else { %>
                         <input type="text" disabled/>
                     <% } %>

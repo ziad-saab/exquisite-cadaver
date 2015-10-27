@@ -309,7 +309,7 @@
 	            var exist = story.exist;
 	            var storyId = story.storyId;
 	            var storyLength = story.storyLength;
-	            console.log("storyLength =" + storyLength);
+
 	            
 	            if (exist === false) {
 	                $app.append('There are no more stories to continue. Why not start a new one?');
@@ -318,41 +318,40 @@
 	                //gets all the lines from the story randomly chosen above
 	                retrieval.getLines(storyId).then(
 	                    function(linesOfSelectedStory) {
-	                        console.log("linesOfSelectedStory = " , linesOfSelectedStory);
 	                        //gets the last written line of the story to continue
 	                        var lastLine = linesOfSelectedStory.length;
-	                        console.log("lastline =" , lastLine);
-	                        
-	                        
-	                        var previousLine = lastLine !== 0? linesOfSelectedStory[lastLine - 1].lineText: 0;
-	                        console.log("previousLine =" , previousLine);
-	                        
-	                        //This creates (with a template) the form to continue the story     
-	                        var entryTemplateText = __webpack_require__(9);
-	                        var template = _.template(entryTemplateText);
-	                        var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
-	                        $app.append(compiledTemplate);
+	                        var previousLine = lastLine -1;
+	                        if (lastLine === 0){
+	                            //I want to restart this step
+	                            getStoryToContinue();
+	                        } else{
+	                            //This creates (with a template) the form to continue the story     
+	                            var entryTemplateText = __webpack_require__(9);
+	                            var template = _.template(entryTemplateText);
+	                            var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
+	                            $app.append(compiledTemplate);
 	                                        
 	                     
-	                        //The ajax function that's triggered when the button is clicked
-	                        $('#submit').on("click", function(){
-	                            var newLine = $('.newLine').val();
-	                            var userId = 1;
+	                            //The ajax function that's triggered when the button is clicked
+	                            $('#submit').on("click", function(){
+	                                var newLine = $('.newLine').val();
+	                                var userId = 1;
 	                            
-	                            if (newLine === undefined || newLine.length < 1) {
-	                                alert("You haven't entered anything!");
-	                            }
-	                            else {
-	                                $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
-	                                
-	                                if (storyLength === (lastLine + 1)) {
-	                                    $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
+	                                if (newLine === undefined || newLine.length < 1) {
+	                                    alert("You haven't entered anything!");
 	                                }
+	                                else {
+	                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
 	                                
-	                                alert("Thanks! Your new line was submitted.");
-	                                window.location.href = "#choice";
-	                            }
-	                        });    
+	                                    if (storyLength === (lastLine + 1)) {
+	                                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
+	                                    }
+	                                
+	                                    alert("Thanks! Your new line was submitted.");
+	                                    window.location.href = "#choice";
+	                                }
+	                            }); 
+	                        }    
 	                    }
 	                );
 	            }
@@ -2106,7 +2105,7 @@
 /* 9 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= previousLine %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
 
 /***/ },
 /* 10 */
