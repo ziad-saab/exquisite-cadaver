@@ -109,7 +109,7 @@ function seeCompletedStories(pageNum) {
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
-                    $app.append("<img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'>");
+                    $app.append("<img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
                     $app.append("<li>" + line.lineText + "</li>");
@@ -117,13 +117,13 @@ function seeCompletedStories(pageNum) {
                     console.log(rating);
                     
                     //Voting functions
-                    $('.upvoting').on("click", function(){
+                    $('.upvoting' + id).on("click", function(){
                         $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
                         alert("Thanks! Your vote was submitted.");
                         window.location.reload();
                     });
                     
-                    $('.downvoting').on("click", function(){
+                    $('.downvoting' + id).click(function(){
                         $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
                         alert("Thanks! Your vote was submitted.");
                         window.location.reload();
@@ -153,7 +153,7 @@ function seeCompletedStories(pageNum) {
             }    
         }
     );
-    $app.append('<div>Arrow icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>          is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>');
+    
     createFooter();
 }
 
