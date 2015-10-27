@@ -47,15 +47,14 @@
 	$(document).foundation();
 
 	// Button that displays the about-rules layout 
-
 	var $layout = $('.aboutTheProjectAndRules');
-	$('.buttonAbout').click(function(e){
+	$('body').on("click", '#bottomButtonAbout', function(e) {
 	    $layout.removeClass('hide').addClass('show animated slideInUp');
 	     e.preventDefault();
 	});
 
-	//Button that closes the about-rules layout
-	$('.buttonAboutClose').click(function(e){
+	// Button that closes the about-rules layout
+	$('body').on("click", '.buttonAboutClose', function(e){
 	    $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');
 	    setTimeout(function() {
 	        $layout.removeClass('animated slideOutDown').addClass('hide');
@@ -328,7 +327,7 @@
 	                        var previousLine = lastLine !== 0? linesOfSelectedStory[lastLine - 1].lineText: 0;
 	                        console.log("previousLine =" , previousLine);
 	                        
-	                        //This is the template    
+	                        //This creates (with a template) the form to continue the story     
 	                        var entryTemplateText = __webpack_require__(10);
 	                        var template = _.template(entryTemplateText);
 	                        var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
@@ -2082,7 +2081,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"layout.ejs\" id=\"bottomButtonAbout class=\"button radius\">ABOUT & RULES</a>\n\n<!--Button that displays the about-rules layout -->\n\n<%var $layout = $('.aboutTheProjectAndRules');\n$('#bottomButtonAbout').click(function(e){\n    $layout.removeClass('hide').addClass('show animated slideInUp');\n     e.preventDefault();\n});\n\n//Button that closes the about-rules layout\n$('.buttonAboutClose').click(function(e){\n    $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');\n    setTimeout(function() {\n        $layout.removeClass('animated slideOutDown').addClass('hide');\n    }, 1000)\n    e.preventDefault();\n});%>"
+	module.exports = "<a href=\"layout.ejs\" id=\"bottomButtonAbout\" class=\"button radius\">ABOUT & RULES</a>"
 
 /***/ },
 /* 6 */
@@ -2112,7 +2111,7 @@
 /* 10 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                   <% if(i === lastLine) {  %>\n                        <div class=\"small-1 columns\">\n                            <label class=\"inline\"><%= i + 1 %>.</label>\n                        </div>\n                        <div class=\"small-11 columns\">\n                            <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                        </div>\n                    <% } else if(i === lastLine - 1) { %>\n                        <div class=\"small-1 columns\">\n                            <label class=\"inline\"><%= i + 1 %>.</label>   \n                        </div>\n                        <div class=\"small-11 columns\">\n                            <input class=\"previousLine\" type=\"text\" disabled placeholder=<%= previousLine %>/>   \n                        </div>\n                    <% } else { %>\n                            <div class=\"small-1 columns\">\n                                <label class=\"inline\"><%= i %>.</label>\n                            </div>\n                            <div class=\"small-11 columns\">\n                                <input type=\"text\" disabled/>\n                            </div>\n                    <% } %>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>        \n                \n\n\n                        "
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= previousLine %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>        \n                \n\n\n                        "
 
 /***/ },
 /* 11 */

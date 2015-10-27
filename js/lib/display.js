@@ -209,7 +209,7 @@ function getStoryToContinue() {
                         var previousLine = lastLine !== 0? linesOfSelectedStory[lastLine - 1].lineText: 0;
                         console.log("previousLine =" , previousLine);
                         
-                        //This is the template    
+                        //This creates (with a template) the form to continue the story     
                         var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
                         var template = _.template(entryTemplateText);
                         var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});

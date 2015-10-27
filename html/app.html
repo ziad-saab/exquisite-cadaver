@@ -1,30 +1,75 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Application - Exquisite Cadaver</title>
-        <link rel="stylesheet" href="../css/app.css" />
-        <script src="../bower_components/modernizr/modernizr.js"></script>
-    </head>
-    <body class="text-center">
-        <header id="header">
-        </header>
 
-        <div id="app"></div>
-        <div id="buttons"></div>
-        
-        <footer id="footer">
-            <div class="row">
-                <div class="small-4 columns">
+<head>
+    <meta charset="utf-8" />
+    <title>Application - Exquisite Cadaver</title>
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../bower_components/animate.css/animate.css" type="text/css" />
+    <script src="../bower_components/modernizr/modernizr.js"></script>
+</head>
 
-        </footer>
-        
-        <div id="layout"></div>
-        
-        
+<body class="text-center">
+    <header id="header">
+    </header>
+
+    <div id="app"></div>
+    <div id="buttons"></div>
+
+    <div id="layout"></div>
+
+    <div class="aboutTheProjectAndRules hide">
+        <div id="aboutCover"></div>
+        <div id="aboutBottom">
+            <div id="aboutBottomContent">
+                <div class="aboutColumn" id="aboutBottomContentHeader">
+                    <div id="aboutBottomContentTitle">ABOUT</div>
+                </div>
+                <div class="aboutColumn" id="aboutBottomContentBody">
+                    <p>Exquisite cadaver is the final project for the
+                        <a href="http://www.decodemtl.com/web-development-full-time/">
+                            <img class="decodemtlLogo" src="../images/decodemtl-logo-black.png">
+                        </a>
+                        web development bootcamp.
+                    </p>
+                </div>
+                <ul class="aboutColumn" id="aboutBottomContentCredits">
+                    <li class="creditsTitle">The back-end developer is: </li>
+                    <li><a href="http://cathe313.github.io/">Catherine Ducharme</a></li>
+                    <li class="creditsTitle">The front-end developper is: </li>
+                    <li>Marie-Eve Gauthier</li>
+                </ul>
+            </div>
+            <div class="aboutColumn" id="rulesBottomContentHeader">
+                <div id="rulesBottomContentTitle">RULES</div>
+            </div>
+            <div class="aboutColumn" id="rulesBottomContentBody">
+                <p> Exquisite cadaver is a game....</p>
+                <p>There are few rules but we are stricted about it</p>
+            </div>
+            <div class aboutColumn id="rulesBottomContentList">
+                <ul class="aboutColumn">
+                    <li>Proper Spelling</li>
+                    <li>No pubs</li>
+                    <li>Respectful contents</li>
+                    <li>No sms language neither smileys</li>
+                    <li>A lot of creativy! </li>
+                </ul>
+            </div>
+            <div class="letterTriangle">
+                <a class="buttonAboutClose" href="#">X</a>
+            </div>
+        </div>
+    </div>
     
+    <footer id="footer">
+        <div class="row">
+            <div class="small-4 columns">
+    </footer>
+
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../bower_components/foundation/js/foundation.min.js"></script>    
-    <script src="../js/app-bundle.js"></script>    
-    </body>
+    <script src="../bower_components/foundation/js/foundation.min.js"></script>
+    <script src="../js/app-bundle.js"></script>
+</body>
+
 </html>
