@@ -24,15 +24,16 @@ function createFooter(options) {
     $footer.append(compiledTemplate);
 }
 
-//This function deploys the layout
-var $layout = $('.aboutTheProjectAndRules hide');
-function deployingLayout() {
-    $layout.html('');
-    var entryTemplateText = require('raw!../views/layout.ejs');
-    var template = _.template( entryTemplateText );
-    var compiledTemplate = template();
-    $layout.append(compiledTemplate);
-}
+//This function could deploy the layout with template
+
+//var $layout = $('#layout');
+//function deployingLayout() {
+//    var entryTemplateText = require('raw!../views/layout.ejs');
+//    var template = _.template( entryTemplateText );
+//    var compiledTemplate = template();
+//    $layout.append(compiledTemplate);
+//    }    
+
   
 
 //This function permits users to choose the length of a new story:
@@ -185,9 +186,6 @@ function getStoryToContinue() {
     $buttons.html('');
     createHeader();
     
-
-    
-    //$app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(story) {
             var exist = story.exist;
