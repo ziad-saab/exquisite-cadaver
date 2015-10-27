@@ -1,25 +1,33 @@
 <a href="#"><button> Back to Main Menu </button></a>
-    retrieval.getIncompleteStory().then(
-        function(object) {
-            var exist = object.exist;
-            var storyId = object.storyId;
-            var storyLength = object.storyLength;
+
+
+<form>
+    <fieldset>
+        <legend>You are continuing story # <%= storyId %></legend>
             
-            if (exist === false) {
-                $app.append('There are no more stories to continue. Why not start a new one?');
-            }
-            else {
-                //gets all the lines from the story randomly chosen above
-                retrieval.getLines(storyId).then(
-                    function(result) {
-                        //gets the last written line of the story to continue
-                        var lastLine = result.length;
-                        console.log(result[lastLine - 1]);
-                        var previousLine = result[lastLine - 1].lineText;
-                        
-                        $app.append("<h2>Story #" + storyId + "</h2>");
-                        $app.append("<h3>Previous Line:</h3>");
-                        $app.append("<p>" + previousLine + "</p>");
-                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-                        $app.append("<button id='submit'>Submit line</button>");
+             <% for(var i = 0; i < storyLength; i++) {  %>
+                
+                <div class="row">
+                    <div class="small-2 columns">
+                        <label class="inline"><%= i + 1 %>.</label>
+                    </div>
+                    <div class="small-10 columns">
+                   <% if(i === lastLine) {  %>
+                        <input class="newLine" type="text" placeholder="Go crazy!" />
+                    <% } else if(i === lastLine - 1) { %>
+                        <input class="previousLine" type="text" disabled placeholder="<%= previousLine %>"/>   
+                    <% } else { %>
+                        <input type="text" disabled/>
+                    <% } %>
+                    </div>
+                </div>
+                    
+            <% } %>
+
+                
+    </fieldset>
+</form>        
+                
+
+
                         

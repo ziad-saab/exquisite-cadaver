@@ -47,15 +47,14 @@
 	$(document).foundation();
 
 	// Button that displays the about-rules layout 
-
 	var $layout = $('.aboutTheProjectAndRules');
-	$('.buttonAbout').click(function(e){
+	$('body').on("click", '#bottomButtonAbout', function(e) {
 	    $layout.removeClass('hide').addClass('show animated slideInUp');
 	     e.preventDefault();
 	});
 
-	//Button that closes the about-rules layout
-	$('.buttonAboutClose').click(function(e){
+	// Button that closes the about-rules layout
+	$('body').on("click", '.buttonAboutClose', function(e){
 	    $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');
 	    setTimeout(function() {
 	        $layout.removeClass('animated slideOutDown').addClass('hide');
@@ -64,7 +63,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(11);
+	var Backbone = __webpack_require__(12);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -173,19 +172,12 @@
 	        var numberOfLines = $(this).val();
 	        var entryTemplateText = __webpack_require__(8);
 	        var template = _.template(entryTemplateText);
-	        var compiledTemplate = template({numberOfLines: numberOfLines});
+	        var compiledTemplate = template({'numberOfLines': numberOfLines});
 	        $app.append(compiledTemplate);
 	        $('.length').off('click');
 	        
 	    
 	        //The ajax function that's triggered when the button in createStory is clicked
-	       /* $('#newStory').on("click", function(){
-	            var newLine = $(this).val();
-	            console.log(newLine);
-	            //var newLine = $('.newLine').val();
-	            var lineNb = $('*[name=nbOfLines]:checked').val();
-	           */ 
-	           
 	        $('#newStory').on("click", function() {
 	        var newLine = $('input[class=newLine]').val();
 	        console.log(newLine);
@@ -311,18 +303,15 @@
 	    $buttons.html('');
 	    createHeader();
 	    
-	//This is the basic if we want to implemant a template    
-	/*    var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
-	    var template = _.template(entryTemplateText);
-	//verify what we have to define    var compiledTemplate = template({'lines':lines, 'storyId':storyId});
-	    $app.append(compiledTemplate);
+
 	    
-	*/    $app.append('<a href="#"><button> Back to Main Menu </button></a>');
+	    //$app.append('<a href="#"><button> Back to Main Menu </button></a>');
 	    retrieval.getIncompleteStory().then(
 	        function(story) {
 	            var exist = story.exist;
 	            var storyId = story.storyId;
 	            var storyLength = story.storyLength;
+	            console.log("storyLength =" + storyLength);
 	            
 	            if (exist === false) {
 	                $app.append('There are no more stories to continue. Why not start a new one?');
@@ -331,17 +320,22 @@
 	                //gets all the lines from the story randomly chosen above
 	                retrieval.getLines(storyId).then(
 	                    function(linesOfSelectedStory) {
-	                        console.log(linesOfSelectedStory);
+	                        console.log("linesOfSelectedStory = " , linesOfSelectedStory);
 	                        //gets the last written line of the story to continue
-	                        var lastLine = result.length;
-	                        var previousLine = result[lastLine - 1].lineText;
+	                        var lastLine = linesOfSelectedStory.length;
+	                        console.log("lastline =" , lastLine);
 	                        
-	                        $app.append("<h2>Story #" + storyId + "</h2>");
-	                        $app.append("<h3>Previous Line:</h3>");
-	                        $app.append("<p>" + previousLine + "</p>");
-	                        $app.append('<form><div class="row"><div class="large-12 columns"><label>You are writing line ' + (lastLine + 1) + '</label><input class="newLine" type="text" placeholder="Go crazy!" /></div></div></form>');
-	                        $app.append("<button id='submit'>Submit line</button>");
 	                        
+	                        var previousLine = lastLine !== 0? linesOfSelectedStory[lastLine - 1].lineText: 0;
+	                        console.log("previousLine =" , previousLine);
+	                        
+	                        //This creates (with a template) the form to continue the story     
+	                        var entryTemplateText = __webpack_require__(10);
+	                        var template = _.template(entryTemplateText);
+	                        var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
+	                        $app.append(compiledTemplate);
+	                                        
+	                     
 	                        //The ajax function that's triggered when the button is clicked
 	                        $('#submit').on("click", function(){
 	                            var newLine = $('.newLine').val();
@@ -376,7 +370,7 @@
 	    $app.html('');
 	    createHeader();
 	    
-	    var entryTemplateText = __webpack_require__(10);
+	    var entryTemplateText = __webpack_require__(11);
 	    var template = _.template(entryTemplateText);
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -2090,7 +2084,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"layout.ejs\" id=\"bottomButtonAbout class=\"button radius\">ABOUT & RULES</a>\n\n<!--Button that displays the about-rules layout -->\n\n<%var $layout = $('.aboutTheProjectAndRules');\n$('#bottomButtonAbout').click(function(e){\n    $layout.removeClass('hide').addClass('show animated slideInUp');\n     e.preventDefault();\n});\n\n//Button that closes the about-rules layout\n$('.buttonAboutClose').click(function(e){\n    $layout.removeClass('show animated slideInUp').addClass('animated slideOutDown');\n    setTimeout(function() {\n        $layout.removeClass('animated slideOutDown').addClass('hide');\n    }, 1000)\n    e.preventDefault();\n});%>"
+	module.exports = "<a href=\"layout.ejs\" id=\"bottomButtonAbout\" class=\"button radius\">ABOUT & RULES</a>"
 
 /***/ },
 /* 6 */
@@ -2120,10 +2114,16 @@
 /* 10 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= previousLine %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>        \n                \n\n\n                        "
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2142,7 +2142,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(12), __webpack_require__(13), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(13), __webpack_require__(14), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4024,7 +4024,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -5578,7 +5578,7 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
