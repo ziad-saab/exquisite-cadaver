@@ -75,7 +75,7 @@ function createStory() {
         }
         else {
             $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
-            var entryTemplateText = require('raw!../views/thanksToSubmit.ejs');
+            var entryTemplateText = require('raw!../views/thanksToSubmitRevealModal.ejs');
             var template = _.template(entryTemplateText);
             var compiledTemplate = template();
             $app.append(compiledTemplate);
@@ -120,7 +120,7 @@ function seeCompletedStories(pageNum) {
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
                     $app.append("<h2>Story #" + id + "</h2>");
-                    $app.append("<div class='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
+                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
                     $app.append("<li>" + line.lineText + "</li>");
@@ -128,24 +128,30 @@ function seeCompletedStories(pageNum) {
                     console.log(rating);
                     
                     //Voting functions
-                    $('.votingThanks').on("click", function(){
-                        $app.append("<div id='myModal' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
+                    $('#votingThanks').on("click", function(){
+                        /*$app.append("<div id='voting' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
                         $app.append("<h2 id='modalTitle'>Thanks!.</h2>");
                         $app.append("<p class='lead'>Your vote was submitted.</p>");
                         $app.append("<a class='close-reveal-modal' aria-label='Close'>&#215;</a>");
-                        $app.append("</div>");
+                        $app.append("</div>");*/
+                        var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
+                        var template = _.template(entryTemplateText);
+                        var compiledTemplate = template();
+                        $app.append(compiledTemplate);
+                        $('#voting').foundation('reveal', 'open');
+                        $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                            $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                            window.location.reload();
+            });
+                        
                     });
                     
                     $('.upvoting').on("click", function(){
                         $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
-                        //alert("Thanks! Your vote was submitted.");
-                        window.location.reload();
                     });
                     
                     $('.downvoting').on("click", function(){
                         $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
-                        //alert("Thanks! Your vote was submitted.");
-                        window.location.reload();
                     });
 
                 });

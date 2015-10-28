@@ -63,7 +63,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(13);
+	var Backbone = __webpack_require__(14);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -238,7 +238,7 @@
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
-	                    $app.append("<div class='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
+	                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
 	                    $app.append("<li>" + line.lineText + "</li>");
@@ -246,24 +246,30 @@
 	                    console.log(rating);
 	                    
 	                    //Voting functions
-	                    $('.votingThanks').on("click", function(){
-	                        $app.append("<div id='myModal' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
+	                    $('#votingThanks').on("click", function(){
+	                        /*$app.append("<div id='voting' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
 	                        $app.append("<h2 id='modalTitle'>Thanks!.</h2>");
 	                        $app.append("<p class='lead'>Your vote was submitted.</p>");
 	                        $app.append("<a class='close-reveal-modal' aria-label='Close'>&#215;</a>");
-	                        $app.append("</div>");
+	                        $app.append("</div>");*/
+	                        var entryTemplateText = __webpack_require__(10);
+	                        var template = _.template(entryTemplateText);
+	                        var compiledTemplate = template();
+	                        $app.append(compiledTemplate);
+	                        $('#voting').foundation('reveal', 'open');
+	                        $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                            $(document).off('closed.fndtn.reveal', '[data-reveal]');
+	                            window.location.reload();
+	            });
+	                        
 	                    });
 	                    
 	                    $('.upvoting').on("click", function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
-	                        //alert("Thanks! Your vote was submitted.");
-	                        window.location.reload();
 	                    });
 	                    
 	                    $('.downvoting').on("click", function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
-	                        //alert("Thanks! Your vote was submitted.");
-	                        window.location.reload();
 	                    });
 
 	                });
@@ -302,7 +308,7 @@
 	            $app.html('');
 	            $buttons.html('');
 	            createHeader();
-	            var entryTemplateText = __webpack_require__(10);
+	            var entryTemplateText = __webpack_require__(11);
 	            var template = _.template(entryTemplateText);
 	            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
 	            $app.append(compiledTemplate);
@@ -344,7 +350,7 @@
 	                            getStoryToContinue();
 	                        } else{
 	                            //This creates (with a template) the form to continue the story     
-	                            var entryTemplateText = __webpack_require__(11);
+	                            var entryTemplateText = __webpack_require__(12);
 	                            var template = _.template(entryTemplateText);
 	                            var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
 	                            $app.append(compiledTemplate);
@@ -385,7 +391,7 @@
 	    $app.html('');
 	    createHeader();
 	    
-	    var entryTemplateText = __webpack_require__(12);
+	    var entryTemplateText = __webpack_require__(13);
 	    var template = _.template(entryTemplateText);
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -2129,22 +2135,28 @@
 /* 10 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<h3>One story, at random:</h3>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
+	module.exports = "<div id=\"voting\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Thanks!</h2>\n    <p class=\"lead\">Your vote was submitted.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 11 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<h3>One story, at random:</h3>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
 
 /***/ },
 /* 12 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
 
 /***/ },
 /* 13 */
+/***/ function(module, exports) {
+
+	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2163,7 +2175,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(14), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(15), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4045,7 +4057,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
