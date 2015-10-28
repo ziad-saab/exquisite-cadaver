@@ -62,8 +62,8 @@
 	    e.preventDefault();
 	});
 
-	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(15);
+	var display = __webpack_require__(1);
+	var Backbone = __webpack_require__(18);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -72,35 +72,47 @@
 	        'continue': 'continueCadaver',
 	        'seeall(/p:pageNum)': 'readCadavers',
 	        'random': 'readCadaver',
-	        'choice': 'nextSteps'
-	        // 'ab/addressbooks/:id1(/:pageNum)/entry/:id2': 'showEntry'
+	        'choice': 'nextSteps',
+	        'login': 'login',
+	        'register': 'register',
+	        'logout': 'logout',
+	        'password': 'resetPassword'
 	    },
-	    // homePage: function() {
-	    //     this.navigate('ab', {trigger: true});
-	    // },
 	    homePage: function() {
 	        this.navigate('choice', {trigger: true});
 	    },
 	    newCadaver: function() {
-	        retrieval.createStory();
+	        display.createStory();
 	    },
 	    continueCadaver: function() {
-	        retrieval.getStoryToContinue();
+	        display.getStoryToContinue();
 	    },
 	    readCadaver: function (){
-	        retrieval.seeCompletedStory();
+	        display.seeCompletedStory();
 	    },
 	    readCadavers: function(pageNum) {
 	        var storyNb = 5;
 	        if (pageNum) {
-	            retrieval.seeCompletedStories(+pageNum, storyNb);
+	            display.seeCompletedStories(+pageNum, storyNb);
 	        }
 	        else {
-	            retrieval.seeCompletedStories(0);
+	            display.seeCompletedStories(0);
 	        }
 	    },
 	    nextSteps: function() {
-	        retrieval.nextSteps();
+	        display.nextSteps();
+	    },
+	    login: function() {
+	        display.userLogin();
+	    },
+	    register: function() {
+	        display.userReg();
+	    },
+	    logout: function() {
+	        display.userLogout();
+	    },
+	    resetPassword: function() {
+	        display.resetPassword();
 	    }
 	});
 
@@ -121,6 +133,12 @@
 	var $app = $('#app');
 	var $buttons = $('#buttons');
 
+	//Code defining the access token of logged in users
+	if (window.localStorage.getItem('accessToken') === null) {
+	    window.localStorage.setItem('accessToken', -1);
+	}
+	console.log(window.localStorage.getItem('accessToken'), "hello from display.js!");
+
 
 	//This function creates the header in each view 
 	var $header = $('#header');
@@ -128,7 +146,7 @@
 	    $header.html('');
 	    var entryTemplateText = __webpack_require__(4);
 	    var template = _.template( entryTemplateText );
-	    var compiledTemplate = template();
+	    var compiledTemplate = template({'accessToken': window.localStorage.getItem('accessToken')});
 	    $header.append(compiledTemplate);
 	}
 
@@ -168,7 +186,7 @@
 	    createFooter();
 	   
 	    // The function that's triggered when the length button is clicked
-	    //This function makes appear the form (with the length choosen) where users write the first line of a new story
+	    //This function displays the form (with the length choosen) where users write the first line of a new story
 	    $(".length").on('click', function() {
 	        var numberOfLines = $(this).val();
 	        var entryTemplateText = __webpack_require__(7);
@@ -210,8 +228,6 @@
 	}
 
 
-
-
 	//This function returns the completed stories in desc order of rating, a certain number per page
 	function seeCompletedStories(pageNum) {
 	    $buttons.html('');
@@ -238,20 +254,18 @@
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
-	                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
+	                    $app.append("<h3>Rating: " + rating + "</h3>");
+	                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'></div>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
-	                    $app.append("<li>" + line.lineText + "</li>");
+	                    $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.userId + "</i></li>");
 	                    });
-	                    console.log(rating);
+	                    
+	                    // var user = loopback.getCurrentContext().get('currentUser');     
+	                    // console.user(user);
 	                    
 	                    //Voting functions
 	                    $('#votingThanks').on("click", function(){
-	                        /*$app.append("<div id='voting' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
-	                        $app.append("<h2 id='modalTitle'>Thanks!.</h2>");
-	                        $app.append("<p class='lead'>Your vote was submitted.</p>");
-	                        $app.append("<a class='close-reveal-modal' aria-label='Close'>&#215;</a>");
-	                        $app.append("</div>");*/
 	                        var entryTemplateText = __webpack_require__(10);
 	                        var template = _.template(entryTemplateText);
 	                        var compiledTemplate = template();
@@ -264,20 +278,18 @@
 	                        
 	                    });
 	                    
-	                    $('.upvoting').on("click", function(){
+	                    $('.upvoting' + id).on("click", function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
 	                    });
 	                    
-	                    $('.downvoting').on("click", function(){
+	                    $('.downvoting' + id).click(function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
 	                    });
 
 	                });
 	                
 	            });
-	            
-	            $app.append("</ul>");
-	    
+
 	            return hasNextPage;
 	       } 
 	    ).then(
@@ -296,6 +308,7 @@
 	            }    
 	        }
 	    );
+	    
 	    createFooter();
 	}
 
@@ -328,6 +341,7 @@
 	    $buttons.html('');
 	    createHeader();
 	    
+
 	    retrieval.getIncompleteStory().then(
 	        function(story) {
 	            var exist = story.exist;
@@ -421,12 +435,154 @@
 	    createFooter();
 	}
 
+
+	function userLogin() {
+	    $buttons.html('');
+	    $app.html('');
+	    createHeader();
+	    var entryTemplateText = __webpack_require__(15);
+	    var template = _.template( entryTemplateText );
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
+	    
+	    // $('.pass').bind('keypress', function(e) {
+	    //     if (e.which == 13) {
+	    //         $('#signin').click();
+	    //     }
+	    // });
+	    
+	    $(".signin").on('click' || 'keypress', function(){
+	        var email = $('input[class=email]').val();
+	        var password = $('input[class=pass]').val();
+	        
+	        if (email === undefined || password === undefined) {
+	            alert("Please enter your email and password.");
+	        }
+	        else {
+	            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
+	                function (res){
+	                    window.localStorage.setItem('accessToken', res.id);
+	                    // var userId = res.userId;
+	                    alert("Welcome back!");
+	                    window.location.href="app.html";
+	                }
+	                
+	            );
+	        }
+	    });
+	    
+	    createFooter();
+	}
+
+	function userLogout() {
+	    $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
+	        function (res){
+	            console.log(res);
+	            alert("You have been logged out. See you soon!");
+	            window.localStorage.setItem('accessToken', -1);
+	            window.location.href="app.html";
+	        }
+	    );
+	}
+
+
+	function userReg() {
+	    $buttons.html('');
+	    $app.html('');
+	    createHeader();
+	    var entryTemplateText = __webpack_require__(16);
+	    var template = _.template( entryTemplateText );
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
+	    
+	    // $('#password2').bind('keypress', function(e) {
+	    //     if (e.which == 13) {
+	    //         $('#signin').click();
+	    //     }
+	    // });
+	    
+	    $(".signup").on('click' || 'keypress', function(){
+	        var username = $('input[class=user]').val();
+	        var email = $('input[class=email]').val();
+	        var password = $('input[class=password]').val();
+	        var password2 = $('input[class=confirmPassword]').val();
+	          
+	        if (email === "" || email === null || username === "" || username === null) {
+	            alert("Please provide a username and email.");
+	        }
+	        else if (password !== password2) {
+	            alert("Passwords don't match!");
+	        }
+	        else if (password.length < 8) {
+	            alert("Please choose a password with at least 8 characters.");
+	        }
+	        else {
+	            $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
+	                function(error, result) {
+	                    console.log(error);
+	                    console.log(result);
+	                    if (error) {
+	                        alert("Looks like someone has already registered with this username or email.");
+	                    }
+	                    else if (result.response) {
+	                        alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
+	                        window.location.href="app.html";
+	                    
+	                    }
+	            });
+	              
+	        }
+	    });        
+	    
+	    createFooter();
+	}
+
+	function resetPassword() {
+	    $buttons.html('');
+	    $app.html('');
+	    createHeader();
+	    var entryTemplateText = __webpack_require__(17);
+	    var template = _.template( entryTemplateText );
+	    var compiledTemplate = template();
+	    $app.append(compiledTemplate);
+	    
+	    // $('.pass').bind('keypress', function(e) {
+	    //     if (e.which == 13) {
+	    //         $('#signin').click();
+	    //     }
+	    // });
+	    
+	    $(".reset").on('click' || 'keypress', function(){
+	        var email = $('input[class=email]').val();
+	        
+	        if (email === undefined) {
+	            alert("Please enter your email.");
+	        }
+	        else {
+	            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/reset', data: {'email': email}}).then(
+	                function (res){
+	                    alert("You will receive instructions by email.");
+	                    window.location.href="app.html";
+	                }
+	                
+	            );
+	        }
+	    });
+	    
+	    createFooter();
+	}
+
+
 	module.exports = {
 	    'createStory': createStory,
 	    'seeCompletedStories': seeCompletedStories,
 	    'seeCompletedStory': seeCompletedStory,
 	    'getStoryToContinue': getStoryToContinue,
-	    'nextSteps': nextSteps
+	    'nextSteps': nextSteps,
+	    'userLogin': userLogin,
+	    'userReg': userReg,
+	    'userLogout': userLogout,
+	    'resetPassword': resetPassword
 	};
 
 
@@ -479,8 +635,23 @@
 
 	function getStoriesLines(story) {
 	    var id = story.id;
-	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":"lineText"}');
+	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId"]}');
+	    // .then(
+	    //     function(result){
+	    //         var userId = result.userId;
+	    //         var lineText = result.lineText;
+	            
+	    //         $.getJSON(API_URL + 'user/' + userId)
+	            
+	    //         return {
+	    //             lineText: lineText,
+	    //             username: 
+	    //         }
+	    //     }    
+	    // );
 	}
+
+
 
 	function getRandomStory() {
 	    var arrayOfStories = [];
@@ -2120,7 +2291,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\">Exquisite Cadaver</a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <li class=\"active\">\n          <a href=\"./login.html\">LOGIN</a>\n        </li>\n        <li class=\"active\">\n          <a href=\"./signup.html\">SIGN UP NOW</a>\n        </li>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\"><img src=\"../images/logo.png\"></a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% console.log(accessToken, \"hello from header\")  %>\n        <% if (accessToken === \"-1\") { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
 
 /***/ },
 /* 5 */
@@ -2180,10 +2351,28 @@
 /* 14 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<h4>What would you like to do now?</h4>\n<a class=\"menu\" href=\"#continue\"><button>Continue another story</button></a><br/>\n<a class=\"menu\" href=\"#create\"><button>Create a new story</button></a><br/>\n<a class=\"menu\" href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a class=\"menu\" href=\"#random\"><button>Read a story at random</button></a><br/>"
 
 /***/ },
 /* 15 */
+/***/ function(module, exports) {
+
+	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Welcome Back! </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns \">\n                            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n                        </div>\n                        <div class=\"small-10 columns \">\n                            <input class=\"pass\" type=\"password\" placeholder=\"password\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"signin\">Sign in! </button>\n                <p>Don't have an account? <a href=\"#register\">Sign up here &raquo</a></p>\n                <p><a href=\"#password\">Forgot your password?</a></p>\n            </div>\n        </div>\n    </div>\n\n\n    "
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Sign Up </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2  columns\">\n            <span class=\"prefix\"><i class=\"fi-torso-female\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"user\" type=\"text\" placeholder=\"username\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns\">\n            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"email\" type=\"text\" placeholder=\"email\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"password (min. 8 characters)\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"signup\">Sign Up! </button>\n      <p>Already have an account? <a href=\"#login\">Login here &raquo</a></p>\n    </div>\n  </div>\n</div>"
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Forgot your password? </p>\n                <p>Enter your email below: </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"reset\"> Reset my password </button>\n             \n            </div>\n        </div>\n    </div>\n\n\n    "
+
+/***/ },
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2202,7 +2391,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(16), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(19), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4084,7 +4273,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 16 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!

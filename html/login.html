@@ -34,7 +34,7 @@
                         </div>
                     </div>
                 </form>
-                <a class="button ">Sign in! </a>
+                <button class="signin">Sign in! </button>
                 <p>Don't have an account? <a href="./signup.html">Sign up here &raquo</a></p>
             </div>
         </div>
@@ -54,7 +54,7 @@
     
     <script>
     
-        $(".button").on('click', function(){
+        $(".signin").on('click', function(){
             var email = $('input[class=email]').val();
             var password = $('input[class=pass]').val();
             
@@ -64,9 +64,11 @@
             else {
                 $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
                     function (res){
-                        console.log(res);
+                        var accessToken = res.id;
+                        var userId = res.userId;
+                        console.log(accessToken, userId);
                         alert("Welcome back!");
-                        window.location.href = "#choice";
+                        window.location.href="app.html";
                     }
                     
                 )

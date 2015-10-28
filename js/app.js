@@ -16,7 +16,7 @@ $('body').on("click", '.buttonAboutClose', function(e){
     e.preventDefault();
 });
 
-var retrieval = require('./lib/display.js');
+var display = require('./lib/display.js');
 var Backbone = require('backbone');
 
 var router = Backbone.Router.extend({
@@ -26,35 +26,47 @@ var router = Backbone.Router.extend({
         'continue': 'continueCadaver',
         'seeall(/p:pageNum)': 'readCadavers',
         'random': 'readCadaver',
-        'choice': 'nextSteps'
-        // 'ab/addressbooks/:id1(/:pageNum)/entry/:id2': 'showEntry'
+        'choice': 'nextSteps',
+        'login': 'login',
+        'register': 'register',
+        'logout': 'logout',
+        'password': 'resetPassword'
     },
-    // homePage: function() {
-    //     this.navigate('ab', {trigger: true});
-    // },
     homePage: function() {
         this.navigate('choice', {trigger: true});
     },
     newCadaver: function() {
-        retrieval.createStory();
+        display.createStory();
     },
     continueCadaver: function() {
-        retrieval.getStoryToContinue();
+        display.getStoryToContinue();
     },
     readCadaver: function (){
-        retrieval.seeCompletedStory();
+        display.seeCompletedStory();
     },
     readCadavers: function(pageNum) {
         var storyNb = 5;
         if (pageNum) {
-            retrieval.seeCompletedStories(+pageNum, storyNb);
+            display.seeCompletedStories(+pageNum, storyNb);
         }
         else {
-            retrieval.seeCompletedStories(0);
+            display.seeCompletedStories(0);
         }
     },
     nextSteps: function() {
-        retrieval.nextSteps();
+        display.nextSteps();
+    },
+    login: function() {
+        display.userLogin();
+    },
+    register: function() {
+        display.userReg();
+    },
+    logout: function() {
+        display.userLogout();
+    },
+    resetPassword: function() {
+        display.resetPassword();
     }
 });
 
