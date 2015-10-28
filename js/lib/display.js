@@ -292,8 +292,8 @@ function getStoryToContinue() {
                         //gets the last written line of the story to continue
                         var lastLine = linesOfSelectedStory.length;
                         var previousLine = lastLine -1;
+                        //If the story doesn't have a line yet, choose another story
                         if (lastLine === 0){
-                            //I want to restart this step
                             getStoryToContinue();
                         } else{
                             //This creates (with a template) the form to continue the story     
@@ -308,9 +308,6 @@ function getStoryToContinue() {
                                 var newLine = $('.newLine').val();
                                 var userId = 1;
                             
-                               /* if (newLine === undefined || newLine.length < 1) {
-                                    alert("You haven't entered anything!");
-                                }*/
                                 if (newLine === undefined || newLine.length < 1) {
                                     //To create a modal reveal with a template to advise the user to write something
                                     var entryTemplateText = require('raw!../views/emptyLineRevealModal.ejs');
@@ -329,16 +326,7 @@ function getStoryToContinue() {
                                         $(document).off('closed.fndtn.reveal', '[data-reveal]');
                                         window.location.href = "#choice";
                                     });
-                                /*else {
-                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
-                                
-                                    if (storyLength === (lastLine + 1)) {
-                                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
-                                    }
-                                
-                                    alert("Thanks! Your new line was submitted.");
-                                    window.location.href = "#choice";
-                                }*/
+            
                                 }    
                             }); 
                             
@@ -363,7 +351,6 @@ function nextSteps() {
     var template = _.template(entryTemplateText);
     var compiledTemplate = template();
     $app.append(compiledTemplate);
-    // $app.append('<h3>Thanks for your contribution!</h3>');
     
     createFooter();
 }
@@ -387,35 +374,76 @@ function userLogin() {
     $(".signin").on('click' || 'keypress', function(){
         var email = $('input[class=email]').val();
         var password = $('input[class=pass]').val();
-        
-        if (email === undefined || password === undefined) {
-            alert("Please enter your email and password.");
+        if (!email || !password) {
+            var entryTemplateText = require('raw!../views/emailAndPasswordMissingRevealModal.ejs');
+            var template = _.template(entryTemplateText);
+            var compiledTemplate = template();
+            $app.append(compiledTemplate);
+            $('#emailAndPasswordMissing').foundation('reveal', 'open');
         }
         else {
-            $.ajax({method: "POST", url: retrieval.API_URL + 'users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
-                function (res){
-                    window.localStorage.setItem('accessToken', res.id);
-                    // var userId = res.userId;
-                    alert("Welcome back!");
-                    window.location.href="app.html";
-                }
+             var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }})
+            .done(function(data) {
+                window.localStorage.setItem('accessToken', data.id);
+                var entryTemplateText = require('raw!../views/welcomeBackRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template({'data':data});
+                $app.append(compiledTemplate);
+                $('#welcomeBack').foundation('reveal', 'open');
+
+                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                window.location.href = "app.html";
+                });
+            })
+            .fail(function(jqXHR, textStatus) {
+                if (jqXHR.status == 401) {
+                var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template();
+                $app.append(compiledTemplate);
                 
-            );
-        }
-    });
-    
+                $('#problem').foundation('reveal', 'open');
+                } else {
+                    var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                    var template = _.template(entryTemplateText);
+                    var compiledTemplate = template();
+                    $app.append(compiledTemplate);
+                    
+                    $('#problem').foundation('reveal', 'open');
+                }
+            });
+        }    
+    });    
     createFooter();
 }
 
 function userLogout() {
-    $.ajax({method: "POST", url: retrieval.API_URL + 'users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
-        function (res){
-            console.log(res);
-            alert("You have been logged out. See you soon!");
-            window.localStorage.setItem('accessToken', -1);
-            window.location.href="app.html";
-        }
-    );
+
+   var jqxhr = $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')})
+            .done(function(data) {
+                window.localStorage.setItem('accessToken', -1);
+                var entryTemplateText = require('raw!../views/logOutRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template();
+                $app.append(compiledTemplate);
+                $('#logOut').foundation('reveal', 'open');
+                
+                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                window.location.href = "index.html";
+                });
+            })
+            .fail(function(jqXHR, textStatus) {
+                var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template();
+                $app.append(compiledTemplate);
+                
+                $('#problem').foundation('reveal', 'open');
+                
+            });
+
 }
 
 
@@ -441,30 +469,50 @@ function userReg() {
         var password2 = $('input[class=confirmPassword]').val();
           
         if (email === "" || email === null || username === "" || username === null) {
-            alert("Please provide a username and email.");
-        }
+            var entryTemplateText = require('raw!../views/registerEmailAndPasswordMissingRevealModal.ejs');
+            var template = _.template(entryTemplateText);
+            var compiledTemplate = template();
+            $app.append(compiledTemplate);
+            $('#registerEmailAndPasswordMissing').foundation('reveal', 'open');
+    }
         else if (password !== password2) {
-            alert("Passwords don't match!");
+            var entryTemplateText = require('raw!../views/registerPasswordDifferentRevealModal.ejs');
+            var template = _.template(entryTemplateText);
+            var compiledTemplate = template();
+            $app.append(compiledTemplate);
+            $('#registerPasswordDifferent').foundation('reveal', 'open');
         }
         else if (password.length < 8) {
-            alert("Please choose a password with at least 8 characters.");
+            var entryTemplateText = require('raw!../views/registerPasswordShortRevealModal.ejs');
+            var template = _.template(entryTemplateText);
+            var compiledTemplate = template();
+            $app.append(compiledTemplate);
+            $('#registerPasswordShort').foundation('reveal', 'open');
         }
-        else {
-            $.ajax({method: "POST", url:retrieval.API_URL + 'users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
-                function(result) {
-                    console.log(result);
-                    if (Error) {
-                        alert("There was an " + Error);
-                    }
-                    else if (result.response) {
-                        alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
-                        window.location.href="app.html";
-                    }
-                    else {
-                        alert('An unidentified problem has occured!');
-                    }
+
+        else{
+            var jqxhr = $.ajax( {method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}} )
+            .done(function(data) {
+                var entryTemplateText = require('raw!../views/registerConfirmationRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template({'data':data});
+                $app.append(compiledTemplate);
+                $('#registerConfirmation').foundation('reveal', 'open');
+                
+                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                window.location.href = "app.html";
+                });
+            })
+            .fail(function(jqXHR, textStatus) {
+                var entryTemplateText = require('raw!../views/registerAlreadyExistRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template();
+                $app.append(compiledTemplate);
+                $('#registerAlreayExist').foundation('reveal', 'open');
+
             });
-              
+            
         }
     });        
     
@@ -488,18 +536,39 @@ function resetPassword() {
     
     $(".reset").on('click' || 'keypress', function(){
         var email = $('input[class=email]').val();
-        
-        if (email === undefined) {
-            alert("Please enter your email.");
+        console.log(email);
+        if (!email) {
+            var entryTemplateText = require('raw!../views/passwordResetEmailMissingRevealModal.ejs');
+            var template = _.template( entryTemplateText );
+            var compiledTemplate = template();
+            $app.append(compiledTemplate);
+            $('#passwordResetEmailMissing').foundation('reveal', 'open');
+            
         }
         else {
-            $.ajax({method: "POST", url: retrieval.API_URL + 'users/reset', data: {'email': email}}).then(
-                function (res){
-                    alert("You will receive instructions by email.");
-                    window.location.href="app.html";
-                }
+
+            var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/reset', data: {'email': email}} )
+            .done(function(data) {
+                var entryTemplateText = require('raw!../views/passwordResetConfirmationRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template({'data':data});
+                $app.append(compiledTemplate);
+                $('#passwordResetConfirmation').foundation('reveal', 'open');
+
                 
-            );
+                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                window.location.href = "app.html";
+                });
+            })
+            .fail(function(jqXHR, textStatus) {
+                var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                var template = _.template(entryTemplateText);
+                var compiledTemplate = template();
+                $app.append(compiledTemplate);
+                $('#problem').foundation('reveal', 'open');
+            });
+
         }
     });
     

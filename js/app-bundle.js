@@ -63,7 +63,7 @@
 	});
 
 	var display = __webpack_require__(1);
-	var Backbone = __webpack_require__(20);
+	var Backbone = __webpack_require__(31);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -426,8 +426,8 @@
 	                        //gets the last written line of the story to continue
 	                        var lastLine = linesOfSelectedStory.length;
 	                        var previousLine = lastLine -1;
+	                        //If the story doesn't have a line yet, choose another story
 	                        if (lastLine === 0){
-	                            //I want to restart this step
 	                            getStoryToContinue();
 	                        } else{
 	                            //This creates (with a template) the form to continue the story     
@@ -442,9 +442,6 @@
 	                                var newLine = $('.newLine').val();
 	                                var userId = 1;
 	                            
-	                               /* if (newLine === undefined || newLine.length < 1) {
-	                                    alert("You haven't entered anything!");
-	                                }*/
 	                                if (newLine === undefined || newLine.length < 1) {
 	                                    //To create a modal reveal with a template to advise the user to write something
 	                                    var entryTemplateText = __webpack_require__(8);
@@ -463,16 +460,7 @@
 	                                        $(document).off('closed.fndtn.reveal', '[data-reveal]');
 	                                        window.location.href = "#choice";
 	                                    });
-	                                /*else {
-	                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
-	                                
-	                                    if (storyLength === (lastLine + 1)) {
-	                                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + storyId, data: {'incomplete': false}});
-	                                    }
-	                                
-	                                    alert("Thanks! Your new line was submitted.");
-	                                    window.location.href = "#choice";
-	                                }*/
+	            
 	                                }    
 	                            }); 
 	                            
@@ -497,7 +485,6 @@
 	    var template = _.template(entryTemplateText);
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
-	    // $app.append('<h3>Thanks for your contribution!</h3>');
 	    
 	    createFooter();
 	}
@@ -521,35 +508,76 @@
 	    $(".signin").on('click' || 'keypress', function(){
 	        var email = $('input[class=email]').val();
 	        var password = $('input[class=pass]').val();
-	        
-	        if (email === undefined || password === undefined) {
-	            alert("Please enter your email and password.");
+	        if (!email || !password) {
+	            var entryTemplateText = __webpack_require__(17);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#emailAndPasswordMissing').foundation('reveal', 'open');
 	        }
 	        else {
-	            $.ajax({method: "POST", url: retrieval.API_URL + 'users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
-	                function (res){
-	                    window.localStorage.setItem('accessToken', res.id);
-	                    // var userId = res.userId;
-	                    alert("Welcome back!");
-	                    window.location.href="app.html";
-	                }
+	             var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }})
+	            .done(function(data) {
+	                window.localStorage.setItem('accessToken', data.id);
+	                var entryTemplateText = __webpack_require__(18);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template({'data':data});
+	                $app.append(compiledTemplate);
+	                $('#welcomeBack').foundation('reveal', 'open');
+
+	                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+	                window.location.href = "app.html";
+	                });
+	            })
+	            .fail(function(jqXHR, textStatus) {
+	                if (jqXHR.status == 401) {
+	                var entryTemplateText = __webpack_require__(19);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template();
+	                $app.append(compiledTemplate);
 	                
-	            );
-	        }
-	    });
-	    
+	                $('#problem').foundation('reveal', 'open');
+	                } else {
+	                    var entryTemplateText = __webpack_require__(19);
+	                    var template = _.template(entryTemplateText);
+	                    var compiledTemplate = template();
+	                    $app.append(compiledTemplate);
+	                    
+	                    $('#problem').foundation('reveal', 'open');
+	                }
+	            });
+	        }    
+	    });    
 	    createFooter();
 	}
 
 	function userLogout() {
-	    $.ajax({method: "POST", url: retrieval.API_URL + 'users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
-	        function (res){
-	            console.log(res);
-	            alert("You have been logged out. See you soon!");
-	            window.localStorage.setItem('accessToken', -1);
-	            window.location.href="app.html";
-	        }
-	    );
+
+	   var jqxhr = $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')})
+	            .done(function(data) {
+	                window.localStorage.setItem('accessToken', -1);
+	                var entryTemplateText = __webpack_require__(20);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template();
+	                $app.append(compiledTemplate);
+	                $('#logOut').foundation('reveal', 'open');
+	                
+	                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+	                window.location.href = "index.html";
+	                });
+	            })
+	            .fail(function(jqXHR, textStatus) {
+	                var entryTemplateText = __webpack_require__(19);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template();
+	                $app.append(compiledTemplate);
+	                
+	                $('#problem').foundation('reveal', 'open');
+	                
+	            });
+
 	}
 
 
@@ -557,7 +585,7 @@
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
-	    var entryTemplateText = __webpack_require__(17);
+	    var entryTemplateText = __webpack_require__(21);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -575,30 +603,50 @@
 	        var password2 = $('input[class=confirmPassword]').val();
 	          
 	        if (email === "" || email === null || username === "" || username === null) {
-	            alert("Please provide a username and email.");
-	        }
+	            var entryTemplateText = __webpack_require__(22);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#registerEmailAndPasswordMissing').foundation('reveal', 'open');
+	    }
 	        else if (password !== password2) {
-	            alert("Passwords don't match!");
+	            var entryTemplateText = __webpack_require__(23);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#registerPasswordDifferent').foundation('reveal', 'open');
 	        }
 	        else if (password.length < 8) {
-	            alert("Please choose a password with at least 8 characters.");
+	            var entryTemplateText = __webpack_require__(24);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#registerPasswordShort').foundation('reveal', 'open');
 	        }
-	        else {
-	            $.ajax({method: "POST", url:retrieval.API_URL + 'users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
-	                function(result) {
-	                    console.log(result);
-	                    if (Error) {
-	                        alert("There was an " + Error);
-	                    }
-	                    else if (result.response) {
-	                        alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
-	                        window.location.href="app.html";
-	                    }
-	                    else {
-	                        alert('An unidentified problem has occured!');
-	                    }
+
+	        else{
+	            var jqxhr = $.ajax( {method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}} )
+	            .done(function(data) {
+	                var entryTemplateText = __webpack_require__(25);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template({'data':data});
+	                $app.append(compiledTemplate);
+	                $('#registerConfirmation').foundation('reveal', 'open');
+	                
+	                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+	                window.location.href = "app.html";
+	                });
+	            })
+	            .fail(function(jqXHR, textStatus) {
+	                var entryTemplateText = __webpack_require__(26);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template();
+	                $app.append(compiledTemplate);
+	                $('#registerAlreayExist').foundation('reveal', 'open');
+
 	            });
-	              
+	            
 	        }
 	    });        
 	    
@@ -609,7 +657,7 @@
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
-	    var entryTemplateText = __webpack_require__(18);
+	    var entryTemplateText = __webpack_require__(27);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -622,18 +670,39 @@
 	    
 	    $(".reset").on('click' || 'keypress', function(){
 	        var email = $('input[class=email]').val();
-	        
-	        if (email === undefined) {
-	            alert("Please enter your email.");
+	        console.log(email);
+	        if (!email) {
+	            var entryTemplateText = __webpack_require__(28);
+	            var template = _.template( entryTemplateText );
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#passwordResetEmailMissing').foundation('reveal', 'open');
+	            
 	        }
 	        else {
-	            $.ajax({method: "POST", url: retrieval.API_URL + 'users/reset', data: {'email': email}}).then(
-	                function (res){
-	                    alert("You will receive instructions by email.");
-	                    window.location.href="app.html";
-	                }
+
+	            var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/reset', data: {'email': email}} )
+	            .done(function(data) {
+	                var entryTemplateText = __webpack_require__(29);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template({'data':data});
+	                $app.append(compiledTemplate);
+	                $('#passwordResetConfirmation').foundation('reveal', 'open');
+
 	                
-	            );
+	                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+	                window.location.href = "app.html";
+	                });
+	            })
+	            .fail(function(jqXHR, textStatus) {
+	                var entryTemplateText = __webpack_require__(19);
+	                var template = _.template(entryTemplateText);
+	                var compiledTemplate = template();
+	                $app.append(compiledTemplate);
+	                $('#problem').foundation('reveal', 'open');
+	            });
+
 	        }
 	    });
 	    
@@ -644,7 +713,7 @@
 	    $buttons.html('');
 	    $app.html('');
 	    createHeader();
-	    var entryTemplateText = __webpack_require__(19);
+	    var entryTemplateText = __webpack_require__(30);
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -2458,7 +2527,7 @@
 /* 14 */
 /***/ function(module, exports) {
 
-	module.exports = "<div id=\"thanksToSubmitLine\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Thanks!</h2>\n    <p class=\"lead\">Your new line was submitted.</p>'\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+	module.exports = "<div id=\"thanksToSubmitLine\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Thanks!</h2>\n    <p class=\"lead\">Your new line was submitted.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 15 */
@@ -2470,28 +2539,94 @@
 /* 16 */
 /***/ function(module, exports) {
 
-	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Welcome Back! </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns \">\n                            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n                        </div>\n                        <div class=\"small-10 columns \">\n                            <input class=\"pass\" type=\"password\" placeholder=\"password\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"signin\">Sign in! </button>\n                <p>Don't have an account? <a href=\"#register\">Sign up here &raquo</a></p>\n                <p><a href=\"#password\">Forgot your password?</a></p>\n            </div>\n        </div>\n    </div>\n\n\n    "
+	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Welcome Back! </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\" value=\"marie.eve.gauthier@hotmail.com\">\n                        </div>\n                    </div>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns \">\n                            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n                        </div>\n                        <div class=\"small-10 columns \">\n                            <input class=\"pass\" type=\"password\" placeholder=\"password\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"signin\">Sign in!</button>\n                <p>Don't have an account? <a href=\"#register\">Sign up here &raquo;</a></p>\n                <p><a href=\"#password\">Forgot your password?</a></p>\n            </div>\n        </div>\n    </div>\n\n\n    "
 
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Sign Up </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2  columns\">\n            <span class=\"prefix\"><i class=\"fi-torso-female\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"user\" type=\"text\" placeholder=\"username\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns\">\n            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"email\" type=\"text\" placeholder=\"email\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"password (min. 8 characters)\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"signup\">Sign Up! </button>\n      <p>Already have an account? <a href=\"#login\">Login here &raquo</a></p>\n    </div>\n  </div>\n</div>"
+	module.exports = "<div id=\"emailAndPasswordMissing\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Please enter your email and password.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
-	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Forgot your password? </p>\n                <p>Enter your email below: </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"reset\"> Reset my password </button>\n             \n            </div>\n        </div>\n    </div>\n\n\n    "
+	module.exports = "<div id=\"welcomeBack\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Welcome back <%= data.username %> !</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 19 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Choose your new password </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"new password (min. 8 characters)\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm new password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"change\"> Change password </button>\n    </div>\n  </div>\n</div>"
+	module.exports = "<div id=\"problem\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Oops! Something went wrong.</h2>\n    <p class=\"lead\">Please try again!</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 20 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"logOut\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p>You have been logged out.</p>\n    <p class=\"lead\">See you soon!</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Sign Up </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2  columns\">\n            <span class=\"prefix\"><i class=\"fi-torso-female\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"user\" type=\"text\" placeholder=\"username\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns\">\n            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n          </div>\n          <div class=\"small-10  columns\">\n            <input class=\"email\" type=\"text\" placeholder=\"email\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"password (min. 8 characters)\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"signup\">Sign Up! </button>\n      <p>Already have an account? <a href=\"#login\">Login here &raquo</a></p>\n    </div>\n  </div>\n</div>"
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"registerEmailAndPasswordMissing\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Please provide a username and email.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"registerPasswordDifferent\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Passwords don't match!</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"registerPasswordShort\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Please choose a password with at least 8 characters.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"registerConfirmation\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Welcome @ <%= data.response.username %>! We sent you a confirmation link by email. Click on it to complete your registration.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 26 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"registerAlreayExist\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Looks like someone has already registered with this username or email.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 27 */
+/***/ function(module, exports) {
+
+	module.exports = "    <a href=\"#\"><button> Back to Main Menu </button></a>\n    <div class=\"row\">\n        <div class=\"large-6 columns\">\n            <div class=\"signup-panel\">\n                <p class=\"welcome\"> Forgot your password? </p>\n                <p>Enter your email below: </p>\n                <form>\n                    <div class=\"row collapse\">\n                        <div class=\"small-2 columns\">\n                            <span class=\"prefix\"><i class=\"fi-mail\"></i></span>\n                        </div>\n                        <div class=\"small-10  columns\">\n                            <input class= \"email\" type=\"text\" placeholder=\"email\">\n                        </div>\n                    </div>\n                </form>\n                <button class=\"reset\"> Reset my password </button>\n             \n            </div>\n        </div>\n    </div>\n\n\n    "
+
+/***/ },
+/* 28 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"passwordResetEmailMissing\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">Please enter your email.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
+
+	module.exports = "<div id=\"passwordResetConfirmation\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <p class=\"lead\">You will receive instructions by email.</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
+
+/***/ },
+/* 30 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n<div class=\"row\">\n  <div class=\"large-6 columns\">\n    <div class=\"signup-panel\">\n      <p class=\"welcome\"> Choose your new password </p>\n      <form>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"password\" type=\"password\" placeholder=\"new password (min. 8 characters)\">\n          </div>\n        </div>\n        <div class=\"row collapse\">\n          <div class=\"small-2 columns \">\n            <span class=\"prefix\"><i class=\"fi-lock\"></i></span>\n          </div>\n          <div class=\"small-10 columns \">\n            <input class=\"confirmPassword\" type=\"password\" placeholder=\"confirm new password\" required=\"\" name=\"confirmPassword\" data-invalid=\"\">\n          </div>\n        </div>\n      </form>\n      <button class=\"change\"> Change password </button>\n    </div>\n  </div>\n</div>"
+
+/***/ },
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2510,7 +2645,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(21), __webpack_require__(22), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(32), __webpack_require__(33), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4392,7 +4527,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 21 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -5946,7 +6081,7 @@
 
 
 /***/ },
-/* 22 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
