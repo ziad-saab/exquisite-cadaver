@@ -75,11 +75,11 @@ function createStory() {
         }
         else {
             $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
-            var entryTemplateText = require('raw!../views/thanksToSubmitRevealModal.ejs');
+            var entryTemplateText = require('raw!../views/thanksToSubmitStoryRevealModal.ejs');
             var template = _.template(entryTemplateText);
             var compiledTemplate = template();
             $app.append(compiledTemplate);
-            $('#thanksToSubmit').foundation('reveal', 'open');
+            $('#thanksToSubmitStory').foundation('reveal', 'open');
             $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
                 $(document).off('closed.fndtn.reveal', '[data-reveal]');
                 window.location.href = "#choice";
@@ -243,10 +243,28 @@ function getStoryToContinue() {
                                 var newLine = $('.newLine').val();
                                 var userId = 1;
                             
-                                if (newLine === undefined || newLine.length < 1) {
+                               /* if (newLine === undefined || newLine.length < 1) {
                                     alert("You haven't entered anything!");
-                                }
-                                else {
+                                }*/
+                                if (newLine === undefined || newLine.length < 1) {
+                                    //To create a modal reveal with a template to advise the user to write something
+                                    var entryTemplateText = require('raw!../views/emptyLineRevealModal.ejs');
+                                    var template = _.template(entryTemplateText);
+                                    var compiledTemplate = template();
+                                    $app.append(compiledTemplate);
+                                    $('#emptyLine').foundation('reveal', 'open');
+                                } else {
+                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
+                                    var entryTemplateText = require('raw!../views/thanksToSubmitLineRevealModal.ejs');
+                                    var template = _.template(entryTemplateText);
+                                    var compiledTemplate = template();
+                                    $app.append(compiledTemplate);
+                                    $('#thanksToSubmitLine').foundation('reveal', 'open');
+                                    $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                        $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                        window.location.href = "#choice";
+                                    });
+                                /*else {
                                     $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
                                 
                                     if (storyLength === (lastLine + 1)) {
@@ -255,8 +273,11 @@ function getStoryToContinue() {
                                 
                                     alert("Thanks! Your new line was submitted.");
                                     window.location.href = "#choice";
-                                }
+                                }*/
+                                }    
                             }); 
+                            
+                          
                         }    
                     }
                 );
