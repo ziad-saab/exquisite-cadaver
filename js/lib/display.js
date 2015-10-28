@@ -1,9 +1,14 @@
 var retrieval = require('./retrieval.js');
-// var loopback = require('loopback');
 var _ = require("underscore");
 var $app = $('#app');
 var $buttons = $('#buttons');
-// var accessToken;
+
+//Code defining the access token of logged in users
+if (window.localStorage.getItem('accessToken') === null) {
+    window.localStorage.setItem('accessToken', -1);
+}
+console.log(window.localStorage.getItem('accessToken'), "hello from display.js!");
+
 
 //This function creates the header in each view 
 var $header = $('#header');
@@ -11,7 +16,7 @@ function createHeader(options) {
     $header.html('');
     var entryTemplateText = require('raw!../views/header.ejs');
     var template = _.template( entryTemplateText );
-    var compiledTemplate = template({'accessToken': -1});
+    var compiledTemplate = template({'accessToken': window.localStorage.getItem('accessToken')});
     $header.append(compiledTemplate);
 }
 
@@ -50,7 +55,7 @@ function createStory() {
     createFooter();
    
     // The function that's triggered when the length button is clicked
-    //This function makes appear the form (with the length choosen) where users write the first line of a new story
+    //This function displays the form (with the length choosen) where users write the first line of a new story
     $(".length").on('click', function() {
         var numberOfLines = $(this).val();
         var entryTemplateText = require('raw!../views/createStoryText.ejs');
@@ -80,8 +85,6 @@ function createStory() {
         
 
 }
-
-
 
 
 //This function returns the completed stories in desc order of rating, a certain number per page
@@ -187,10 +190,7 @@ function getStoryToContinue() {
     $app.html('');
     $buttons.html('');
     createHeader();
-    
 
-    
-    //$app.append('<a href="#"><button> Back to Main Menu </button></a>');
     retrieval.getIncompleteStory().then(
         function(story) {
             var exist = story.exist;
@@ -285,19 +285,15 @@ function userLogin() {
         var password = $('input[class=pass]').val();
         
         if (email === undefined || password === undefined) {
-            alert("Please enter your username and password.");
+            alert("Please enter your email and password.");
         }
         else {
-            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password}}).then(
+            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
                 function (res){
-                    var accessToken = res.id;
-                    var userId = res.userId;
+                    window.localStorage.setItem('accessToken', res.id);
+                    // var userId = res.userId;
                     alert("Welcome back!");
                     window.location.href="app.html";
-                    return {
-                        'userId':userId,
-                        'accessToken': accessToken
-                    };
                 }
                 
             );
@@ -305,6 +301,17 @@ function userLogin() {
     });
     
     createFooter();
+}
+
+function userLogout() {
+    $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
+        function (res){
+            console.log(res);
+            alert("You have been logged out. See you soon!");
+            window.localStorage.setItem('accessToken', -1);
+            window.location.href="app.html";
+        }
+    );
 }
 
 
@@ -340,14 +347,16 @@ function userReg() {
         }
         else {
             $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
-                function(result) {
-                    console.log(result.response);
-                    if (result.response.error) {
-                      alert("Someone is already using this username or email.");
+                function(error, result) {
+                    console.log(error);
+                    console.log(result);
+                    if (error) {
+                        alert("Looks like someone has already registered with this username or email.");
                     }
-                    else {
-                      alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
-                      window.location.href="app.html";
+                    else if (result.response) {
+                        alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
+                        window.location.href="app.html";
+                    
                     }
             });
               
@@ -355,7 +364,41 @@ function userReg() {
     });        
     
     createFooter();
+}
+
+function resetPassword() {
+    $buttons.html('');
+    $app.html('');
+    createHeader();
+    var entryTemplateText = require('raw!../views/passwordreset.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
     
+    // $('.pass').bind('keypress', function(e) {
+    //     if (e.which == 13) {
+    //         $('#signin').click();
+    //     }
+    // });
+    
+    $(".reset").on('click' || 'keypress', function(){
+        var email = $('input[class=email]').val();
+        
+        if (email === undefined) {
+            alert("Please enter your email.");
+        }
+        else {
+            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/reset', data: {'email': email}}).then(
+                function (res){
+                    alert("You will receive instructions by email.");
+                    window.location.href="app.html";
+                }
+                
+            );
+        }
+    });
+    
+    createFooter();
 }
 
 
@@ -367,5 +410,6 @@ module.exports = {
     'nextSteps': nextSteps,
     'userLogin': userLogin,
     'userReg': userReg,
-    // 'accessToken': accessToken
+    'userLogout': userLogout,
+    'resetPassword': resetPassword
 };

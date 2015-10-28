@@ -18,8 +18,6 @@ $('body').on("click", '.buttonAboutClose', function(e){
 
 var display = require('./lib/display.js');
 var Backbone = require('backbone');
-// var accessToken = display.accessToken;
-// console.log(accessToken + " from app.js");
 
 var router = Backbone.Router.extend({
     routes: {
@@ -30,7 +28,9 @@ var router = Backbone.Router.extend({
         'random': 'readCadaver',
         'choice': 'nextSteps',
         'login': 'login',
-        'register': 'register'
+        'register': 'register',
+        'logout': 'logout',
+        'password': 'resetPassword'
     },
     homePage: function() {
         this.navigate('choice', {trigger: true});
@@ -57,14 +57,16 @@ var router = Backbone.Router.extend({
         display.nextSteps();
     },
     login: function() {
-        display.userLogin().then(
-            function (userInfo) {
-                console.log(userInfo);
-            }
-        )
+        display.userLogin();
     },
     register: function() {
         display.userReg();
+    },
+    logout: function() {
+        display.userLogout();
+    },
+    resetPassword: function() {
+        display.resetPassword();
     }
 });
 
