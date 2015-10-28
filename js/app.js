@@ -30,7 +30,8 @@ var router = Backbone.Router.extend({
         'login': 'login',
         'register': 'register',
         'logout': 'logout',
-        'password': 'resetPassword'
+        'password': 'resetPassword',
+        'reset?access_token=:token': 'newPassword'
     },
     homePage: function() {
         this.navigate('choice', {trigger: true});
@@ -67,6 +68,9 @@ var router = Backbone.Router.extend({
     },
     resetPassword: function() {
         display.resetPassword();
+    },
+    newPassword: function(token) {
+        display.newPassword(token);
     }
 });
 

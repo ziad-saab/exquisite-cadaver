@@ -7,7 +7,10 @@ var $buttons = $('#buttons');
 if (window.localStorage.getItem('accessToken') === null) {
     window.localStorage.setItem('accessToken', -1);
 }
-console.log(window.localStorage.getItem('accessToken'), "hello from display.js!");
+if (window.localStorage.getItem('storyId') === null) {
+    window.localStorage.setItem('storyId', -1);
+}
+console.log(window.localStorage.getItem('accessToken', 'storyId'), "hello from display.js!");
 
 
 //This function creates the header in each view 
@@ -111,7 +114,7 @@ function seeCompletedStories(pageNum) {
     // $app.append(compiledTemplate);
     
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
-    $app.append("<h3>All stories, descending order of rating:</h3>");
+    // $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
         function(apiResultObject) {
             var stories = apiResultObject.arrayOfStories;
@@ -135,25 +138,85 @@ function seeCompletedStories(pageNum) {
                     // console.user(user);
                     
                     //Voting functions
-                    $('#votingThanks').on("click", function(){
-                        var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
-                        var template = _.template(entryTemplateText);
-                        var compiledTemplate = template();
-                        $app.append(compiledTemplate);
-                        $('#voting').foundation('reveal', 'open');
-                        $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
-                            $(document).off('closed.fndtn.reveal', '[data-reveal]');
-                            window.location.reload();
-            });
-                        
-                    });
+                    
+                    var token = window.localStorage.getItem('accessToken');
+                    console.log(token);
                     
                     $('.upvoting' + id).on("click", function(){
-                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
+                        var alreadyVoted = JSON.parse(localStorage["storyId"]);
+                        console.log(alreadyVoted);
+                        
+                        if (token === "-1") {
+                            $('#votingThanks').on("click", function(){
+                            var entryTemplateText = require('raw!../views/votingErrorRevealModal.ejs');
+                            var template = _.template(entryTemplateText);
+                            var compiledTemplate = template();
+                            $app.append(compiledTemplate);
+                            $('#voting').foundation('reveal', 'open');
+                            $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                window.location.reload();
+                            });
+                        }); 
+                            
+                        }
+                        else {
+                            $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
+                            
+                            // var alreadyVoted = JSON.parse(localStorage["storyId"]);
+                            // alreadyVoted.append(id);
+                            // localStorage["storyId"] = JSON.stringify(alreadyVoted);
+                            
+                        $('#votingThanks').on("click", function(){
+                            var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
+                            var template = _.template(entryTemplateText);
+                            var compiledTemplate = template();
+                            $app.append(compiledTemplate);
+                            $('#voting').foundation('reveal', 'open');
+                            $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                window.location.reload();
+                            });
+                        });   
+                        }
                     });
                     
                     $('.downvoting' + id).click(function(){
-                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
+                        if (token === "-1") {
+                            $('#votingThanks').on("click", function(){
+                                var entryTemplateText = require('raw!../views/votingErrorRevealModal.ejs');
+                                var template = _.template(entryTemplateText);
+                                var compiledTemplate = template();
+                                $app.append(compiledTemplate);
+                                $('#voting').foundation('reveal', 'open');
+                                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                    $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                    window.location.reload();
+                                });
+                            }); 
+                        }
+                        
+                        else {
+                            $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
+                            
+                            // var alreadyVoted = JSON.parse(localStorage["storyId"]);
+                            // alreadyVoted.append(id);
+                            // localStorage["storyId"] = JSON.stringify(alreadyVoted);
+                            
+                            $('#votingThanks').on("click", function(){
+                                var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
+                                var template = _.template(entryTemplateText);
+                                var compiledTemplate = template();
+                                $app.append(compiledTemplate);
+                                $('#voting').foundation('reveal', 'open');
+                                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                    $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                    window.location.reload();
+                                });
+                            });   
+
+
+                        }
                     });
 
                 });
@@ -329,7 +392,7 @@ function userLogin() {
             alert("Please enter your email and password.");
         }
         else {
-            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
+            $.ajax({method: "POST", url: retrieval.API_URL + 'users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }}).then(
                 function (res){
                     window.localStorage.setItem('accessToken', res.id);
                     // var userId = res.userId;
@@ -345,7 +408,7 @@ function userLogin() {
 }
 
 function userLogout() {
-    $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
+    $.ajax({method: "POST", url: retrieval.API_URL + 'users/logout?access_token=' + window.localStorage.getItem('accessToken')}).then(
         function (res){
             console.log(res);
             alert("You have been logged out. See you soon!");
@@ -387,17 +450,18 @@ function userReg() {
             alert("Please choose a password with at least 8 characters.");
         }
         else {
-            $.ajax({method: "POST", url:'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
-                function(error, result) {
-                    console.log(error);
+            $.ajax({method: "POST", url:retrieval.API_URL + 'users/newUser', data: {'username': username, 'email': email, 'password': password}}).then(
+                function(result) {
                     console.log(result);
-                    if (error) {
-                        alert("Looks like someone has already registered with this username or email.");
+                    if (Error) {
+                        alert("There was an " + Error);
                     }
                     else if (result.response) {
                         alert("Welcome @" + result.response.username + "! We sent you a confirmation link by email. Click on it to complete your registration.");
                         window.location.href="app.html";
-                    
+                    }
+                    else {
+                        alert('An unidentified problem has occured!');
                     }
             });
               
@@ -429,7 +493,7 @@ function resetPassword() {
             alert("Please enter your email.");
         }
         else {
-            $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/reset', data: {'email': email}}).then(
+            $.ajax({method: "POST", url: retrieval.API_URL + 'users/reset', data: {'email': email}}).then(
                 function (res){
                     alert("You will receive instructions by email.");
                     window.location.href="app.html";
@@ -438,6 +502,44 @@ function resetPassword() {
             );
         }
     });
+    
+    createFooter();
+}
+
+function newPassword(token) {
+    $buttons.html('');
+    $app.html('');
+    createHeader();
+    var entryTemplateText = require('raw!../views/newpassword.ejs');
+    var template = _.template( entryTemplateText );
+    var compiledTemplate = template();
+    $app.append(compiledTemplate);
+    
+    $(".change").on('click' || 'keypress', function(){
+        var password = $('input[class=password]').val();
+        var password2 = $('input[class=confirmPassword]').val();
+          
+        if (password !== password2) {
+            alert("Passwords don't match!");
+        }
+        else if (password.length < 8) {
+            alert("Please choose a password with at least 8 characters.");
+        }
+        else {
+            $.ajax({method: "POST", url:retrieval.API_URL + 'users/changePassword', data: {'token': token, 'newPassword': password}}).then(
+                function(result) {
+                    console.log(result);
+                    if (result) {
+                        alert('Thanks, your password was changed.');
+                        window.location.href="app.html";
+                    }
+                    else {
+                        alert("That didn't seem to work!");
+                    }    
+            });
+              
+        }
+    });        
     
     createFooter();
 }
@@ -452,5 +554,6 @@ module.exports = {
     'userLogin': userLogin,
     'userReg': userReg,
     'userLogout': userLogout,
-    'resetPassword': resetPassword
+    'resetPassword': resetPassword,
+    'newPassword': newPassword
 };
