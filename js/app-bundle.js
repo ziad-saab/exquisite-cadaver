@@ -63,7 +63,7 @@
 	});
 
 	var retrieval = __webpack_require__(1);
-	var Backbone = __webpack_require__(11);
+	var Backbone = __webpack_require__(13);
 
 	var router = Backbone.Router.extend({
 	    routes: {
@@ -181,17 +181,27 @@
 	        //The ajax function that's triggered when the button in createStory is clicked
 	        $('#newStory').on("click", function() {
 	        var newLine = $('input[class=newLine]').val();
-	        console.log(newLine);
-	        
 	        var userId = 1;
 	    
 	        if (!newLine || newLine.length < 1) {
-	            alert("You haven't entered anything!");
+	            //To create a modal reveal with a template to advise the user to write something
+	            var entryTemplateText = __webpack_require__(8);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#emptyLine').foundation('reveal', 'open');
 	        }
 	        else {
-	                $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
-	                alert("Thanks! Your new story was submitted.");
+	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
+	            var entryTemplateText = __webpack_require__(9);
+	            var template = _.template(entryTemplateText);
+	            var compiledTemplate = template();
+	            $app.append(compiledTemplate);
+	            $('#thanksToSubmit').foundation('reveal', 'open');
+	            $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
 	                window.location.href = "#choice";
+	            });
 	        }
 	        });
 	    });
@@ -228,7 +238,7 @@
 	                retrieval.getStoriesLines(story).then(
 	                function(lines) {
 	                    $app.append("<h2>Story #" + id + "</h2>");
-	                    $app.append("<img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'>");
+	                    $app.append("<div class='votingThanks' data-reveal-id='voting'><img class='downvoting' src='../images/downarrow.png'><img class='upvoting' src='../images/uparrow.png'></div>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
 	                    $app.append("<li>" + line.lineText + "</li>");
@@ -236,15 +246,23 @@
 	                    console.log(rating);
 	                    
 	                    //Voting functions
+	                    $('.votingThanks').on("click", function(){
+	                        $app.append("<div id='myModal' class='reveal-modal' data-reveal aria-labelledby='modalTitle' aria-hidden='true' role='dialog'>");
+	                        $app.append("<h2 id='modalTitle'>Thanks!.</h2>");
+	                        $app.append("<p class='lead'>Your vote was submitted.</p>");
+	                        $app.append("<a class='close-reveal-modal' aria-label='Close'>&#215;</a>");
+	                        $app.append("</div>");
+	                    });
+	                    
 	                    $('.upvoting').on("click", function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating + 1)}});
-	                        alert("Thanks! Your vote was submitted.");
+	                        //alert("Thanks! Your vote was submitted.");
 	                        window.location.reload();
 	                    });
 	                    
 	                    $('.downvoting').on("click", function(){
 	                        $.ajax({method: "PUT", url: retrieval.API_URL + 'Stories/' + id, data: {'rating': (rating - 1)}});
-	                        alert("Thanks! Your vote was submitted.");
+	                        //alert("Thanks! Your vote was submitted.");
 	                        window.location.reload();
 	                    });
 
@@ -284,7 +302,7 @@
 	            $app.html('');
 	            $buttons.html('');
 	            createHeader();
-	            var entryTemplateText = __webpack_require__(8);
+	            var entryTemplateText = __webpack_require__(10);
 	            var template = _.template(entryTemplateText);
 	            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
 	            $app.append(compiledTemplate);
@@ -326,7 +344,7 @@
 	                            getStoryToContinue();
 	                        } else{
 	                            //This creates (with a template) the form to continue the story     
-	                            var entryTemplateText = __webpack_require__(9);
+	                            var entryTemplateText = __webpack_require__(11);
 	                            var template = _.template(entryTemplateText);
 	                            var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
 	                            $app.append(compiledTemplate);
@@ -367,7 +385,7 @@
 	    $app.html('');
 	    createHeader();
 	    
-	    var entryTemplateText = __webpack_require__(10);
+	    var entryTemplateText = __webpack_require__(12);
 	    var template = _.template(entryTemplateText);
 	    var compiledTemplate = template();
 	    $app.append(compiledTemplate);
@@ -2093,28 +2111,40 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	module.exports = "\n\n<form>\n    <fieldset>\n        <legend>Write the story's first line below:</legend>\n            <div class=\"row\">\n                <div class=\"small-1 columns\">\n                    <label class=\"inline\">1.</label>\n                </div>\n                <div class=\"small-11 columns\">\n                    <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                </div>\n            </div>\n            <% for(var i = 0; i < numberOfLines - 1; i++) { %>\n                <div class=\"row\">\n                    <div class=\"small-1 columns\">\n                        <label class=\"inline\"><%= i+2 %>.</label>\n                    </div>\n                    <div class=\"small-11 columns\">\n                        <input type=\"text\" disabled/>\n                    </div>\n                </div>\n            <% } %>\n    </fieldset>\n</form>\n\n<button id=\"newStory\">Submit line</button>\n\n"
+	module.exports = "\n\n<form>\n    <fieldset>\n        <legend>Write the story's first line below:</legend>\n            <div class=\"row\">\n                <div class=\"small-1 columns\">\n                    <label class=\"inline\">1.</label>\n                </div>\n                <div class=\"small-11 columns\">\n                    <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                </div>\n            </div>\n            <% for(var i = 0; i < numberOfLines - 1; i++) { %>\n                <div class=\"row\">\n                    <div class=\"small-1 columns\">\n                        <label class=\"inline\"><%= i+2 %>.</label>\n                    </div>\n                    <div class=\"small-11 columns\">\n                        <input type=\"text\" disabled/>\n                    </div>\n                </div>\n            <% } %>\n    </fieldset>\n</form>\n\n<button id=\"newStory\" data-reveal-id=\"emptyLine thanksToSubmit\">Submit line</button>\n\n"
 
 /***/ },
 /* 8 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<h3>One story, at random:</h3>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
+	module.exports = "\n<div id=\"emptyLine\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Oops!</h2>\n    <p class=\"lead\">\"You haven't entered anything!\"</p>\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 9 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
+	module.exports = "<div id=\"thanksToSubmit\" class=\"reveal-modal\" data-reveal aria-labelledby=\"modalTitle\" aria-hidden=\"true\" role=\"dialog\">\n    <h2 id=\"modalTitle\">Thanks!</h2>\n    <p class=\"lead\">Your new story was submitted.</p>'\n    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n</div>"
 
 /***/ },
 /* 10 */
 /***/ function(module, exports) {
 
-	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<h3>One story, at random:</h3>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" />\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\">Submit line</button>\n                \n\n\n                        "
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = "<h4>What would you like to do now?</h4>\n<a href=\"#continue\"><button>Continue another story</button></a><br/>\n<a href=\"#create\"><button>Create a new story</button></a><br/>\n<a href=\"#seeall\"><button>Rate the other stories</button></a><br/>\n<a href=\"#random\"><button>Read a story at random</button></a><br/>"
+
+/***/ },
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.2.3
@@ -2133,7 +2163,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(12), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(14), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -4015,7 +4045,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
