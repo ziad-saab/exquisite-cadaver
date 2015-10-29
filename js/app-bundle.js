@@ -158,6 +158,7 @@
 	    var template = _.template( entryTemplateText );
 	    var compiledTemplate = template({'accessToken': window.localStorage.getItem('accessToken')});
 	    $header.append(compiledTemplate);
+	    $header.foundation();
 	}
 
 	//This function creates the footer in each view
@@ -2489,7 +2490,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\"><img src=\"../images/logo.png\"></a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% console.log(accessToken, \"hello from header\")  %>\n        <% if (accessToken === \"-1\") { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\"><img src=\"../images/logo.png\"></a></h1>\n      </li>\n      <li class=\"toggle-topbar menu-icon\"><a href=\"#\"><span>Menu</span></a></li>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% if (accessToken === \"-1\") { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
 
 /***/ },
 /* 5 */
@@ -2543,7 +2544,7 @@
 /* 13 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset>\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-9 columns\">\n                   <% if(i === lastLine) {  %>\n                        <input class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" maxlength=\"60\" />\n                        <div class=\"small-1 columns\">\n                            <label id=\"chars\" class=\"inline\"> <%= length %></label>\n                        </div>\n                    <% } else if(i === lastLine - 1) { %>\n                        <input class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                    <% } else { %>\n                        <input type=\"text\" disabled/>\n                    <% } %>\n                    </div>\n                    <!--<div class=\"small-2 columns\">\n                        <label id=\"chars\" class=\"inline\">60</label> \n                    </div>-->\n                </div>\n                    \n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\" data-reveal-id=\"emptyLine thanksToSubmit\">Submit line</button>\n                \n\n\n                        "
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n\n<form>\n    <fieldset class=\"small-12 columns\">\n        <legend>You are continuing story # <%= storyId %></legend>\n            \n             <% for(var i = 0; i < storyLength; i++) {  %>\n                \n                <div class=\"row\">\n                    <div class=\"small-2 columns\">\n                        <label class=\"inline\"><%= i + 1 %>.</label>\n                    </div>\n                    <div class=\"small-10 columns\">\n                        <% if (i === lastLine) {  %>\n                        <textarea class=\"newLine\" type=\"text\" placeholder=\"Go crazy!\" maxlength=\"60\" />\n                        <% } else if(i === lastLine - 1) { %>\n                        <textarea class=\"previousLine\" type=\"text\" disabled placeholder=\"<%= linesOfSelectedStory[lastLine - 1].lineText %>\"/>   \n                        <% } else {  %>\n                            <textarea type=\"text\" disabled/>\n                        <% } %>\n                    </div>\n                </div>\n            <% } %>\n\n                \n    </fieldset>\n</form>      \n\n<button id=\"submit\" data-reveal-id=\"emptyLine thanksToSubmit\">Submit line</button>\n                \n\n\n                        "
 
 /***/ },
 /* 14 */

@@ -13,7 +13,6 @@ if (window.localStorage.getItem('storyId') === null) {
 if (window.localStorage.getItem('userId') === null) {
     window.localStorage.setItem('userId', -1);
 }
-console.log(window.localStorage.getItem('accessToken'), window.localStorage.getItem('storyId'), window.localStorage.getItem('userId'), "hello from display.js!");
 
 
 //This function creates the header in each view 
@@ -24,6 +23,7 @@ function createHeader(options) {
     var template = _.template( entryTemplateText );
     var compiledTemplate = template({'accessToken': window.localStorage.getItem('accessToken')});
     $header.append(compiledTemplate);
+    $header.foundation();
 }
 
 //This function creates the footer in each view

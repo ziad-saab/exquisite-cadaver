@@ -2,7 +2,7 @@
 
 
 <form>
-    <fieldset>
+    <fieldset class="small-12 columns">
         <legend>You are continuing story # <%= storyId %></legend>
             
              <% for(var i = 0; i < storyLength; i++) {  %>
@@ -11,23 +11,16 @@
                     <div class="small-2 columns">
                         <label class="inline"><%= i + 1 %>.</label>
                     </div>
-                    <div class="small-9 columns">
-                   <% if(i === lastLine) {  %>
-                        <input class="newLine" type="text" placeholder="Go crazy!" maxlength="60" />
-                        <div class="small-1 columns">
-                            <label id="chars" class="inline"> <%= length %></label>
-                        </div>
-                    <% } else if(i === lastLine - 1) { %>
-                        <input class="previousLine" type="text" disabled placeholder="<%= linesOfSelectedStory[lastLine - 1].lineText %>"/>   
-                    <% } else { %>
-                        <input type="text" disabled/>
-                    <% } %>
+                    <div class="small-10 columns">
+                        <% if (i === lastLine) {  %>
+                        <textarea class="newLine" type="text" placeholder="Go crazy!" maxlength="60" />
+                        <% } else if(i === lastLine - 1) { %>
+                        <textarea class="previousLine" type="text" disabled placeholder="<%= linesOfSelectedStory[lastLine - 1].lineText %>"/>   
+                        <% } else {  %>
+                            <textarea type="text" disabled/>
+                        <% } %>
                     </div>
-                    <!--<div class="small-2 columns">
-                        <label id="chars" class="inline">60</label> 
-                    </div>-->
                 </div>
-                    
             <% } %>
 
                 
