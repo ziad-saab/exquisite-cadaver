@@ -630,7 +630,7 @@
 	                
 	                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
 	                $(document).off('closed.fndtn.reveal', '[data-reveal]');
-	                window.location.href = "index.html";
+	                window.location.href = "app.html";
 	                });
 	            })
 	            .fail(function(jqXHR, textStatus) {
@@ -2554,7 +2554,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"index.html\"><img src=\"../images/logo.png\"></a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% if (accessToken === \"-1\") { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
+	module.exports = "\n<div class=\"contain-to-grid fixed\">\n  <nav class=\"top-bar\" data-topbar role=\"navigation\">\n    <ul class=\"title-area\">\n      <li class=\"name\">\n        <h1><a href=\"../index.html\"><img src=\"../images/logo.png\"></a></h1>\n    </ul>\n  \n    <section class=\"top-bar-section\"> \n       <!--Right Nav Section -->\n      <ul class=\"right\">\n        <% if (accessToken === \"-1\") { %>\n          <li class=\"active\"><a href=\"#login\">LOGIN</a></li>\n          <li class=\"active\"><a href=\"#register\">REGISTER</a></li>\n        <% } else {%>\n          <li class=\"active\"><a href=\"#logout\">LOGOUT</a></li>\n        <% } %>\n      </ul>\n    </section>\n  </nav> \n</div>\n\n"
 
 /***/ },
 /* 5 */

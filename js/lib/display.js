@@ -496,7 +496,7 @@ function userLogout() {
                 
                 $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
                 $(document).off('closed.fndtn.reveal', '[data-reveal]');
-                window.location.href = "index.html";
+                window.location.href = "app.html";
                 });
             })
             .fail(function(jqXHR, textStatus) {
