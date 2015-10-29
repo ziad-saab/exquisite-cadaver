@@ -150,8 +150,6 @@
 	if (window.localStorage.getItem('username') === null) {
 	    window.localStorage.setItem('username', "Guest");
 	}
-	console.log(window.localStorage.getItem('accessToken'), window.localStorage.getItem('storyId'), window.localStorage.getItem('userId'), window.localStorage.getItem('username'), "hello from display.js!");
-
 
 	//This function creates the header in each view 
 	var $header = $('#header');
