@@ -11,15 +11,21 @@
                     <div class="small-2 columns">
                         <label class="inline"><%= i + 1 %>.</label>
                     </div>
-                    <div class="small-10 columns">
+                    <div class="small-9 columns">
                    <% if(i === lastLine) {  %>
-                        <input class="newLine" type="text" placeholder="Go crazy!" />
+                        <input class="newLine" type="text" placeholder="Go crazy!" maxlength="60" />
+                        <div class="small-1 columns">
+                            <label id="chars" class="inline"> <%= length %></label>
+                        </div>
                     <% } else if(i === lastLine - 1) { %>
                         <input class="previousLine" type="text" disabled placeholder="<%= linesOfSelectedStory[lastLine - 1].lineText %>"/>   
                     <% } else { %>
                         <input type="text" disabled/>
                     <% } %>
                     </div>
+                    <!--<div class="small-2 columns">
+                        <label id="chars" class="inline">60</label> 
+                    </div>-->
                 </div>
                     
             <% } %>

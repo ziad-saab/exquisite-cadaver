@@ -296,12 +296,26 @@ function getStoryToContinue() {
                         if (lastLine === 0){
                             getStoryToContinue();
                         } else{
-                            //This creates (with a template) the form to continue the story     
-                            var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
-                            var template = _.template(entryTemplateText);
-                            var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
-                            $app.append(compiledTemplate);
-                                        
+                            //This creates (with a template) the form to continue the story 
+                            
+                            
+                            
+                                var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
+                                var template = _.template(entryTemplateText);
+                                var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
+                                
+                                
+                                
+                                $app.append(compiledTemplate);
+                                
+                    /*            To add a character countdown to show how much space they have remaining
+                            var maxLength = 60;
+                            $('.newLine').keyup(function() {
+                              var length = $(this).val().length;
+                              var length = maxLength-length;
+                             $('#chars').text(length);
+                            
+                            });   */         
                      
                             //The ajax function that's triggered when the button is clicked
                             $('#submit').on("click", function(){
