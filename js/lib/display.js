@@ -25,6 +25,7 @@ function createHeader(options) {
     var template = _.template( entryTemplateText );
     var compiledTemplate = template({'accessToken': window.localStorage.getItem('accessToken')});
     $header.append(compiledTemplate);
+    $header.foundation();
 }
 
 //This function creates the footer in each view
@@ -321,11 +322,21 @@ function getStoryToContinue() {
                         if (lastLine === 0){
                             getStoryToContinue();
                         } else{
+
                             //This creates (with a template) the form to continue the story     
                             var entryTemplateText = require('raw!../views/getStoryToContinue.ejs');
                             var template = _.template(entryTemplateText);
                             var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
                             $app.append(compiledTemplate);
+                            
+                            /* To add a character countdown to show how much space they have remaining
+                            var maxLength = 60;
+                            $('.newLine').keyup(function() {
+                              var length = $(this).val().length;
+                              var length = maxLength-length;
+                             $('#chars').text(length);
+                            
+                            });   */    
                             
                             $('.newLine').keypress(function (e) {
                                  var key = e.which;

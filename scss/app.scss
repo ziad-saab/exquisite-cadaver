@@ -40,6 +40,19 @@
 //   "foundation/components/offcanvas",
 //   "foundation/components/visibility";
 
+body {
+  background-image:url(../images/skulls.png);
+}
+
+li {
+    list-style-type: none;
+}
+
+textarea {
+  width: 100%;
+  resize: none;
+}
+
 .button-group {
   position: relative;
   display: inline-block;
@@ -63,7 +76,8 @@
 }
 
 #app {
-  margin: 150px;
+  margin: auto;
+  max-width: 600px;
 }
 
 #footer {
