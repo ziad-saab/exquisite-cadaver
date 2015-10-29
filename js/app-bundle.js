@@ -144,7 +144,10 @@
 	if (window.localStorage.getItem('storyId') === null) {
 	    window.localStorage.setItem('storyId', -1);
 	}
-	console.log(window.localStorage.getItem('accessToken', 'storyId'), "hello from display.js!");
+	if (window.localStorage.getItem('userId') === null) {
+	    window.localStorage.setItem('userId', -1);
+	}
+	console.log(window.localStorage.getItem('accessToken'), window.localStorage.getItem('storyId'), window.localStorage.getItem('userId'), "hello from display.js!");
 
 
 	//This function creates the header in each view 
@@ -206,7 +209,9 @@
 	        //The ajax function that's triggered when the button in createStory is clicked
 	        $('#newStory').on("click", function() {
 	        var newLine = $('input[class=newLine]').val();
-	        var userId = 1;
+	        var userId = window.localStorage.getItem('userId');
+	        var userobject = $.getJSON(retrieval.API_URL + 'users/' + userId);
+	        var username = userobject.username;
 	    
 	        if (!newLine || newLine.length < 1) {
 	            //To create a modal reveal with a template to advise the user to write something
@@ -217,7 +222,7 @@
 	            $('#emptyLine').foundation('reveal', 'open');
 	        }
 	        else {
-	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId}});
+	            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId, 'username': username}});
 	            var entryTemplateText = __webpack_require__(9);
 	            var template = _.template(entryTemplateText);
 	            var compiledTemplate = template();
@@ -265,16 +270,12 @@
 	                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'></div>");
 	                    $app.append('<ul class="no-bullet">');
 	                    lines.forEach(function(line){
-	                    $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.userId + "</i></li>");
+	                        console.log(line);
+	                        
+	                        $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.username + "</i></li>");
 	                    });
-	                    
-	                    // var user = loopback.getCurrentContext().get('currentUser');     
-	                    // console.user(user);
-	                    
 	                    //Voting functions
-	                    
 	                    var token = window.localStorage.getItem('accessToken');
-	                    console.log(token);
 	                    
 	                    $('.upvoting' + id).on("click", function(){
 	                        var alreadyVoted = JSON.parse(localStorage["storyId"]);
@@ -383,18 +384,20 @@
 	function seeCompletedStory(){
 	    retrieval.getRandomStory().then(
 	        function(lines){
-	            var storyId = lines[1].storiesId;
+	            lines.forEach(function(line){
+	                    var storyId = lines[1].storiesId;
 	            
-	            $app.html('');
-	            $buttons.html('');
-	            createHeader();
-	            var entryTemplateText = __webpack_require__(12);
-	            var template = _.template(entryTemplateText);
-	            var compiledTemplate = template({'lines':lines, 'storyId':storyId});
-	            $app.append(compiledTemplate);
-	            
-	            $('#randomize').on("click", function(){
-	                window.location.reload();
+	                    $app.html('');
+	                    $buttons.html('');
+	                    createHeader();
+	                    var entryTemplateText = __webpack_require__(12);
+	                    var template = _.template(entryTemplateText);
+	                    var compiledTemplate = template({'lines':lines, 'storyId':storyId});
+	                    $app.append(compiledTemplate);
+	                    
+	                    $('#randomize').on("click", function(){
+	                        window.location.reload();
+	                    });
 	            });
 	        }
 	    ); 
@@ -454,7 +457,9 @@
 	                            //The ajax function that's triggered when the button is clicked
 	                            $('#submit').on("click", function(){
 	                                var newLine = $('.newLine').val();
-	                                var userId = 1;
+	                                var userId = window.localStorage.getItem('userId');
+	                                var userobject = $.getJSON(retrieval.API_URL + 'users/' + userId);
+	                                var username = userobject.username;
 	                            
 	                                if (newLine === undefined || newLine.length < 1) {
 	                                    //To create a modal reveal with a template to advise the user to write something
@@ -464,7 +469,7 @@
 	                                    $app.append(compiledTemplate);
 	                                    $('#emptyLine').foundation('reveal', 'open');
 	                                } else {
-	                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId }});
+	                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId, 'username': username }});
 	                                    var entryTemplateText = __webpack_require__(14);
 	                                    var template = _.template(entryTemplateText);
 	                                    var compiledTemplate = template();
@@ -532,7 +537,9 @@
 	        else {
 	             var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }})
 	            .done(function(data) {
+
 	                window.localStorage.setItem('accessToken', data.id);
+	                window.localStorage.setItem('userId', data.userId);
 	                var entryTemplateText = __webpack_require__(18);
 	                var template = _.template(entryTemplateText);
 	                var compiledTemplate = template({'data':data});
@@ -571,6 +578,7 @@
 	   var jqxhr = $.ajax({method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/logout?access_token=' + window.localStorage.getItem('accessToken')})
 	            .done(function(data) {
 	                window.localStorage.setItem('accessToken', -1);
+	                window.localStorage.setItem('userId', -1);
 	                var entryTemplateText = __webpack_require__(20);
 	                var template = _.template(entryTemplateText);
 	                var compiledTemplate = template();
@@ -782,7 +790,7 @@
 
 	
 	//Modify this variable after migrating the api to heroku
-	var API_URL = 'https://exquisite-cadaver-api.herokuapp.com/api/';
+	var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
 	var nbPerPage = 2;
 
@@ -825,7 +833,7 @@
 
 	function getStoriesLines(story) {
 	    var id = story.id;
-	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId"]}');
+	    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId","username"]}');
 	    // .then(
 	    //     function(result){
 	    //         var userId = result.userId;
@@ -2529,7 +2537,7 @@
 /* 12 */
 /***/ function(module, exports) {
 
-	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
+	module.exports = "<a href=\"#\"><button> Back to Main Menu </button></a>\n\n<h2>Story # <%= storyId  %> </h2>\n\n<ul class=\"no-bullet\">\n\n    <% lines.forEach( function(line) { %>\n        <li><%= line.lineText %>  @<%= line.username %></li>\n    <% }); %>\n    \n</ul>\n\n<button id=\"randomize\">Gimme another!</button>\n\n"
 
 /***/ },
 /* 13 */

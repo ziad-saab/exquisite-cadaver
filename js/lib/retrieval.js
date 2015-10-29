@@ -1,6 +1,6 @@
 
 //Modify this variable after migrating the api to heroku
-var API_URL = 'https://exquisite-cadaver-api.herokuapp.com/api/';
+var API_URL = 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/';
 
 var nbPerPage = 2;
 
@@ -43,7 +43,7 @@ function getStoriesByRating(pageNum) {
 
 function getStoriesLines(story) {
     var id = story.id;
-    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId"]}');
+    return $.getJSON(API_URL + 'Stories/' + id + '/Lines?filter={"fields":["lineText","userId","username"]}');
     // .then(
     //     function(result){
     //         var userId = result.userId;
