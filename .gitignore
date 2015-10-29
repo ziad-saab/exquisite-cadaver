@@ -1,5 +1,4 @@
 *.DS_Store
 scss/
-bower_components/
 node_modules/
 js/app.js
