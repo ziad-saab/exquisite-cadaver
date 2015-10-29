@@ -13,7 +13,10 @@ if (window.localStorage.getItem('storyId') === null) {
 if (window.localStorage.getItem('userId') === null) {
     window.localStorage.setItem('userId', -1);
 }
-console.log(window.localStorage.getItem('accessToken'), window.localStorage.getItem('storyId'), window.localStorage.getItem('userId'), "hello from display.js!");
+if (window.localStorage.getItem('username') === null) {
+    window.localStorage.setItem('username', "Guest");
+}
+console.log(window.localStorage.getItem('accessToken'), window.localStorage.getItem('storyId'), window.localStorage.getItem('userId'), window.localStorage.getItem('username'), "hello from display.js!");
 
 
 //This function creates the header in each view 
@@ -71,13 +74,18 @@ function createStory() {
         $app.append(compiledTemplate);
         $('.length').off('click');
         
-    
+        //Triggers a click when the enter key is being pressed
+        $('.newLine').keypress(function (e) {
+            var key = e.which;
+            if(key == 13) {
+                $('#newStory').click();
+                return false;  
+            }
+        });
+        
         //The ajax function that's triggered when the button in createStory is clicked
         $('#newStory').on("click", function() {
         var newLine = $('input[class=newLine]').val();
-        var userId = window.localStorage.getItem('userId');
-        var userobject = $.getJSON(retrieval.API_URL + 'users/' + userId);
-        var username = userobject.username;
     
         if (!newLine || newLine.length < 1) {
             //To create a modal reveal with a template to advise the user to write something
@@ -88,16 +96,35 @@ function createStory() {
             $('#emptyLine').foundation('reveal', 'open');
         }
         else {
-            $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': userId, 'username': username}});
-            var entryTemplateText = require('raw!../views/thanksToSubmitStoryRevealModal.ejs');
-            var template = _.template(entryTemplateText);
-            var compiledTemplate = template();
-            $app.append(compiledTemplate);
-            $('#thanksToSubmitStory').foundation('reveal', 'open');
-            $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
-                $(document).off('closed.fndtn.reveal', '[data-reveal]');
-                window.location.href = "#choice";
-            });
+            var jqxhr = $.ajax({method: "POST", url: retrieval.API_URL + 'Stories/newstory', data: {'length': numberOfLines, 'lineText': newLine, 'userId': window.localStorage.getItem('userId'), 'username': window.localStorage.getItem('username')}})
+                .done(function(data) {
+                    var entryTemplateText = require('raw!../views/thanksToSubmitStoryRevealModal.ejs');
+                    var template = _.template(entryTemplateText);
+                    var compiledTemplate = template();
+                    $app.append(compiledTemplate);
+                    $('#thanksToSubmitStory').foundation('reveal', 'open');
+                    $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                        $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                        window.location.href = "#choice";
+                    });
+                })
+                .fail(function(jqXHR, textStatus) {
+                    if (jqXHR.status == 401) {
+                        var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                        var template = _.template(entryTemplateText);
+                        var compiledTemplate = template();
+                        $app.append(compiledTemplate);
+                        
+                        $('#problem').foundation('reveal', 'open');
+                    } else {
+                        entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                        template = _.template(entryTemplateText);
+                        compiledTemplate = template();
+                        $app.append(compiledTemplate);
+                        
+                        $('#problem').foundation('reveal', 'open');
+                    }
+                });
         }
         });
     });
@@ -112,12 +139,6 @@ function seeCompletedStories(pageNum) {
     $app.html(''); 
     createHeader();
     
-    //This is the basic if we want to implemant a template 
-    // var entryTemplateText = require('raw!../views/seeCompletedStories.ejs');
-    // var template = _.template(entryTemplateText);
-    // var compiledTemplate = template();
-    // $app.append(compiledTemplate);
-    
     $app.append('<a href="#"><button> Back to Main Menu </button></a>');
     // $app.append("<h3>All stories, descending order of rating:</h3>");
     retrieval.getStoriesByRating(pageNum).then(
@@ -131,24 +152,27 @@ function seeCompletedStories(pageNum) {
                 
                 retrieval.getStoriesLines(story).then(
                 function(lines) {
+                    //This is the basic if we want to implemant a template 
+                    // var entryTemplate = require('raw!../views/seeCompletedStories.ejs');
+                    // var template = _.template(entryTemplate);
+                    // var compiledTemplate = template();
+                    // $app.append(compiledTemplate);
                     $app.append("<h2>Story #" + id + "</h2>");
                     $app.append("<h3>Rating: " + rating + "</h3>");
-                    $app.append("<div id='votingThanks' data-reveal-id='voting'><img class='downvoting" + id + "' src='../images/downarrow.png'><img class='upvoting" + id + "' src='../images/uparrow.png'></div>");
+                    $app.append("<div id='votingThanks" + id + "' data-reveal-id='voting'><img id='downvoting" + id + "' src='../images/downarrow.png'><img id='upvoting" + id + "' src='../images/uparrow.png'></div>");
                     $app.append('<ul class="no-bullet">');
                     lines.forEach(function(line){
-                        console.log(line);
-                        
                         $app.append("<li>" + line.lineText + "  <i class='grey'>@" + line.username + "</i></li>");
                     });
                     //Voting functions
                     var token = window.localStorage.getItem('accessToken');
                     
-                    $('.upvoting' + id).on("click", function(){
+                    $('#upvoting' + id).on("click", function(){
                         var alreadyVoted = JSON.parse(localStorage["storyId"]);
                         console.log(alreadyVoted);
                         
                         if (token === "-1") {
-                            $('#votingThanks').on("click", function(){
+                            $('#votingThanks' + id).on("click", function(){
                             var entryTemplateText = require('raw!../views/votingErrorRevealModal.ejs');
                             var template = _.template(entryTemplateText);
                             var compiledTemplate = template();
@@ -168,7 +192,7 @@ function seeCompletedStories(pageNum) {
                             // alreadyVoted.append(id);
                             // localStorage["storyId"] = JSON.stringify(alreadyVoted);
                             
-                        $('#votingThanks').on("click", function(){
+                        $('#votingThanks' + id).on("click", function(){
                             var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
                             var template = _.template(entryTemplateText);
                             var compiledTemplate = template();
@@ -182,9 +206,9 @@ function seeCompletedStories(pageNum) {
                         }
                     });
                     
-                    $('.downvoting' + id).click(function(){
+                    $('#downvoting' + id).click(function(){
                         if (token === "-1") {
-                            $('#votingThanks').on("click", function(){
+                            $('#votingThanks' + id).on("click", function(){
                                 var entryTemplateText = require('raw!../views/votingErrorRevealModal.ejs');
                                 var template = _.template(entryTemplateText);
                                 var compiledTemplate = template();
@@ -204,7 +228,7 @@ function seeCompletedStories(pageNum) {
                             // alreadyVoted.append(id);
                             // localStorage["storyId"] = JSON.stringify(alreadyVoted);
                             
-                            $('#votingThanks').on("click", function(){
+                            $('#votingThanks' + id).on("click", function(){
                                 var entryTemplateText = require('raw!../views/votingThanksRevealModal.ejs');
                                 var template = _.template(entryTemplateText);
                                 var compiledTemplate = template();
@@ -304,14 +328,19 @@ function getStoryToContinue() {
                             var template = _.template(entryTemplateText);
                             var compiledTemplate = template({'previousLine':previousLine, 'linesOfSelectedStory':linesOfSelectedStory, 'storyId':storyId, 'lastLine':lastLine, 'storyLength':storyLength});
                             $app.append(compiledTemplate);
-                                        
-                     
+                            
+                            $('.newLine').keypress(function (e) {
+                                 var key = e.which;
+                                 if(key == 13) {
+                                    $('#submit').click();
+                                    return false;  
+                                  }
+                            });
+ 
                             //The ajax function that's triggered when the button is clicked
                             $('#submit').on("click", function(){
                                 var newLine = $('.newLine').val();
-                                var userId = window.localStorage.getItem('userId');
-                                var userobject = $.getJSON(retrieval.API_URL + 'users/' + userId);
-                                var username = userobject.username;
+                                console.log(newLine);
                             
                                 if (newLine === undefined || newLine.length < 1) {
                                     //To create a modal reveal with a template to advise the user to write something
@@ -321,15 +350,35 @@ function getStoryToContinue() {
                                     $app.append(compiledTemplate);
                                     $('#emptyLine').foundation('reveal', 'open');
                                 } else {
-                                    $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': userId, 'username': username }});
-                                    var entryTemplateText = require('raw!../views/thanksToSubmitLineRevealModal.ejs');
-                                    var template = _.template(entryTemplateText);
-                                    var compiledTemplate = template();
-                                    $app.append(compiledTemplate);
-                                    $('#thanksToSubmitLine').foundation('reveal', 'open');
-                                    $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
-                                        $(document).off('closed.fndtn.reveal', '[data-reveal]');
-                                        window.location.href = "#choice";
+                                    var jqxhr = $.ajax({method: "POST", url: retrieval.API_URL + 'Lines/newline', data: {'lineNumber': (lastLine + 1), 'storyId': storyId, 'lineText': newLine, 'userId': window.localStorage.getItem('userId'), 'username': window.localStorage.getItem('username') }})
+                                    .done(function(data) {
+                                        var entryTemplateText = require('raw!../views/thanksToSubmitLineRevealModal.ejs');
+                                        var template = _.template(entryTemplateText);
+                                        var compiledTemplate = template();
+                                        $app.append(compiledTemplate);
+                                        $('#thanksToSubmitLine').foundation('reveal', 'open');
+                                        $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                                            $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                                            window.location.href = "#choice";
+                                        });                                        
+                                    })
+                                    .fail(function(jqXHR, textStatus) {
+                                        if (jqXHR.status == 401) {
+                                            var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                                            var template = _.template(entryTemplateText);
+                                            var compiledTemplate = template();
+                                            $app.append(compiledTemplate);
+                                            
+                                            $('#problem').foundation('reveal', 'open');
+                                        } else {
+                                            entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                                            template = _.template(entryTemplateText);
+                                            compiledTemplate = template();
+                                            $app.append(compiledTemplate);
+                                            
+                                            $('#problem').foundation('reveal', 'open');
+                                        }
+
                                     });
             
                                 }    
@@ -370,11 +419,14 @@ function userLogin() {
     var compiledTemplate = template();
     $app.append(compiledTemplate);
     
-    // $('.pass').bind('keypress', function(e) {
-    //     if (e.which == 13) {
-    //         $('#signin').click();
-    //     }
-    // });
+    //Triggers a click when the enter key is being pressed
+    $('.pass').keypress(function (e) {
+        var key = e.which;
+        if(key == 13) {
+            $('.signin').click();
+            return false;  
+        }
+    });
     
     $(".signin").on('click' || 'keypress', function(){
         var email = $('input[class=email]').val();
@@ -387,21 +439,25 @@ function userLogin() {
             $('#emailAndPasswordMissing').foundation('reveal', 'open');
         }
         else {
-             var jqxhr = $.ajax( {method: "POST", url: 'https://exquisite-cadaver-loopback-cathe313.c9.io/api/users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }})
+             var jqxhr = $.ajax( {method: "POST", url: retrieval.API_URL + 'users/login', data: {'email': email, 'password': password, 'ttl': 60*60*24*7*2 }})
             .done(function(data) {
-
-                window.localStorage.setItem('accessToken', data.id);
-                window.localStorage.setItem('userId', data.userId);
-                var entryTemplateText = require('raw!../views/welcomeBackRevealModal.ejs');
-                var template = _.template(entryTemplateText);
-                var compiledTemplate = template({'data':data});
-                $app.append(compiledTemplate);
-                $('#welcomeBack').foundation('reveal', 'open');
-
-                $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
-                $(document).off('closed.fndtn.reveal', '[data-reveal]');
-                window.location.href = "app.html";
-                });
+                var url = retrieval.API_URL + 'users/' + data.userId;
+                var jqxhr = $.ajax( {method: "GET", url: url, data: {}})
+                    .done(function(userObject){
+                        window.localStorage.setItem('accessToken', data.id);
+                        window.localStorage.setItem('userId', data.userId);
+                        window.localStorage.setItem('username', userObject.username);
+                        var entryTemplateText = require('raw!../views/welcomeBackRevealModal.ejs');
+                        var template = _.template(entryTemplateText);
+                        var compiledTemplate = template({'data':data});
+                        $app.append(compiledTemplate);
+                        $('#welcomeBack').foundation('reveal', 'open');
+        
+                        $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                        $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                        window.location.href = "app.html";
+                        });
+                    });
             })
             .fail(function(jqXHR, textStatus) {
                 if (jqXHR.status == 401) {
@@ -431,6 +487,7 @@ function userLogout() {
             .done(function(data) {
                 window.localStorage.setItem('accessToken', -1);
                 window.localStorage.setItem('userId', -1);
+                window.localStorage.setItem('username', "Guest");
                 var entryTemplateText = require('raw!../views/logOutRevealModal.ejs');
                 var template = _.template(entryTemplateText);
                 var compiledTemplate = template();
@@ -464,11 +521,14 @@ function userReg() {
     var compiledTemplate = template();
     $app.append(compiledTemplate);
     
-    // $('#password2').bind('keypress', function(e) {
-    //     if (e.which == 13) {
-    //         $('#signin').click();
-    //     }
-    // });
+    //Triggers a click when the enter key is pressed
+    $('.confirmPassword').keypress(function (e) {
+        var key = e.which;
+        if(key == 13) {
+            $('.signup').click();
+            return false;  
+        }
+    });
     
     $(".signup").on('click' || 'keypress', function(){
         var username = $('input[class=user]').val();
@@ -603,18 +663,37 @@ function newPassword(token) {
             alert("Please choose a password with at least 8 characters.");
         }
         else {
-            $.ajax({method: "POST", url:retrieval.API_URL + 'users/changePassword', data: {'token': token, 'newPassword': password}}).then(
-                function(result) {
-                    console.log(result);
-                    if (result) {
-                        alert('Thanks, your password was changed.');
-                        window.location.href="app.html";
+            var jqxhr = $.ajax({method: "POST", url:retrieval.API_URL + 'users/changePassword', data: {'token': token, 'newPassword': password}})
+                .done(function(data) {
+                    var entryTemplateText = require('raw!../views/newpasswordworked.ejs');
+                    var template = _.template(entryTemplateText);
+                    var compiledTemplate = template({'data':data});
+                    $app.append(compiledTemplate);
+                    $('#welcomeBack').foundation('reveal', 'open');
+    
+                    $(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
+                    $(document).off('closed.fndtn.reveal', '[data-reveal]');
+                    window.location.href = "app.html";
+                    });
+                })
+                .fail(function(jqXHR, textStatus) {
+                    if (jqXHR.status == 401) {
+                    var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                    var template = _.template(entryTemplateText);
+                    var compiledTemplate = template();
+                    $app.append(compiledTemplate);
+                    
+                    $('#problem').foundation('reveal', 'open');
+                    } else {
+                        var entryTemplateText = require('raw!../views/problemRevealModal.ejs');
+                        var template = _.template(entryTemplateText);
+                        var compiledTemplate = template();
+                        $app.append(compiledTemplate);
+                        
+                        $('#problem').foundation('reveal', 'open');
                     }
-                    else {
-                        alert("That didn't seem to work!");
-                    }    
-            });
-              
+                });
+  
         }
     });        
     
